@@ -1195,7 +1195,40 @@ function resetForm(keepCommon){
   s.textContent = 'Nouveau PV — non enregistré';
   s.className = 'status';
 }
-document.getElementById('btnNew').addEventListener('click', function(){ clearDraft(); resetForm(false); showView('form'); });
+
+/* Champs propres à chaque pièce/commande : on les vide à chaque nouveau PV
+   pour éviter de garder par erreur les infos de la pièce précédente. */
+var JOB_SPECIFIC_COMMON_FIELDS = ['h_numero','h_commande','h_matiere','h_piece','h_traceNum','h_traceRev','h_montageNum','h_montageRev','h_ncrRefNum','h_stcNum'];
+
+function startNewFromTemplate(){
+  var sameType = allReports.filter(function(r){ return r.type===currentType; });
+  if(!sameType.length){ resetForm(false); renderForm(); renderPreview(); return; }
+  var latest = sameType.slice().sort(function(a,b){ return (b.createdAtMs||0)-(a.createdAtMs||0); })[0];
+  currentReportId = null;
+  // Reprend tout du dernier PV (opérateur, contrôleur, produits/consommables, paramètres…)
+  state.common = Object.assign(defaultCommon(), latest.common||{});
+  state[currentType] = Object.assign(DEFAULTS_BY_TYPE[currentType](), latest.fields||{});
+  // … sauf les infos propres à la pièce/commande en cours, et le constat de ce PV-ci, qu'on repart à zéro.
+  JOB_SPECIFIC_COMMON_FIELDS.forEach(function(k){ state.common[k] = ''; });
+  state.common.h_suiteNC = false;
+  state.common.c_acceptable = '';
+  state.common.c_ncrNum = '';
+  state.common.photos = [];
+  state.common.h_date = todayISO();
+  state.common.op_date = todayISO();
+  state.common.ctrl_date = todayISO();
+  if('b_indications' in state[currentType]) state[currentType].b_indications = '';
+  if('b_zonesInspectees' in state[currentType]) state[currentType].b_zonesInspectees = '';
+  renderTabs();
+  renderForm();
+  suggestNumero();
+  renderPreview();
+  dirty = false;
+  var s = document.getElementById('saveStatus');
+  s.textContent = 'Nouveau PV — non enregistré';
+  s.className = 'status';
+}
+document.getElementById('btnNew').addEventListener('click', function(){ clearDraft(); startNewFromTemplate(); showView('form'); });
 document.getElementById('btnPrint').addEventListener('click', function(){ printOrShare(); });
 
 /* ---------- Aperçu repliable sur mobile (moins de défilement) ---------- */
@@ -1707,5 +1740,6 @@ document.getElementById('btnLogout').addEventListener('click', function(){
 
 })();
 </script>
+
 </body>
 </html>
