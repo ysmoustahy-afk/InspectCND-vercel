@@ -137,11 +137,12 @@ input,select,textarea{font-family:var(--font-body);color:var(--ink);}
 .radio-pill input{accent-color:var(--accent);}
 .radio-pill:has(input:checked){background:var(--accent-soft);border-color:var(--accent);font-weight:600;}
 .subtle-note{font-size:0.72rem;color:var(--ink-faint);margin-top:2px;}
-table.mini{width:100%;border-collapse:collapse;font-size:0.76rem;margin-top:6px;}
-table.mini th{text-align:left;font-size:0.68rem;text-transform:uppercase;letter-spacing:0.03em;color:var(--ink-faint);padding:4px 5px;border-bottom:1px solid var(--line);}
-table.mini td{padding:3px 4px;border-bottom:1px solid var(--line);vertical-align:middle;}
+.table-scroll{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;margin-top:6px;}
+table.mini{width:100%;min-width:640px;border-collapse:collapse;font-size:0.76rem;margin-top:0;}
+table.mini th{text-align:left;font-size:0.68rem;text-transform:uppercase;letter-spacing:0.03em;color:var(--ink-faint);padding:4px 5px;border-bottom:1px solid var(--line);white-space:nowrap;}
+table.mini td{padding:3px 4px;border-bottom:1px solid var(--line);vertical-align:middle;min-width:92px;}
 table.mini input{width:100%;border:1px solid var(--line);border-radius:5px;padding:4px 5px;font-size:0.76rem;background:var(--paper);color:var(--ink);}
-table.mini .rowlabel{font-weight:600;white-space:nowrap;padding-right:8px;}
+table.mini .rowlabel{font-weight:600;white-space:nowrap;padding-right:8px;min-width:120px;}
 table.mini select{width:100%;border:1px solid var(--line);border-radius:5px;padding:4px 3px;font-size:0.72rem;background:var(--paper);color:var(--ink);}
 hr.sep{border:none;border-top:1px solid var(--line);margin:16px 0;}
 
@@ -628,7 +629,7 @@ function grid(children, cols3){
 
 /* products table builder (PT / MT) */
 function productsTable(rows, colDefs, t){
-  var wrap = el('div',{});
+  var wrap = el('div',{class:'table-scroll'});
   var table = el('table',{class:'mini'});
   var thead = el('tr',{});
   thead.appendChild(el('th',{},[document.createTextNode('Étape')]));
