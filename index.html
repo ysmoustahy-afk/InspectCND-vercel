@@ -157,6 +157,7 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:16px 0;}
 /* ---------- preview (printed PV look) ---------- */
 #previewWrap{background:var(--surface-2);padding:14px;}
 #previewPaper{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:18px;font-size:0.72rem;line-height:1.35;color:var(--ink);}
+.pdf-export-surface{background:#ffffff;padding:18px;font-size:0.72rem;line-height:1.35;color:#1a2233;}
 .pv-topline{display:flex;justify-content:space-between;font-size:0.62rem;color:var(--ink-faint);margin-bottom:8px;}
 .pv-head{display:grid;grid-template-columns:90px 110px 1fr 110px;border:1.5px solid var(--ink);}
 .pv-head>div{border-right:1px solid var(--ink);padding:8px;}
@@ -1267,11 +1268,30 @@ function suggestedPdfFilename(){
   var numero = String(state.common.h_numero||'PV').trim().replace(/[^a-zA-Z0-9_-]/g,'') || 'PV';
   return 'PV_'+currentType+'_'+numero+'.pdf';
 }
-/* Rend l'aperçu en PDF (une ou plusieurs pages A4) à partir du rendu HTML, via html2canvas + jsPDF. */
+/* Rend l'aperçu en PDF (une ou plusieurs pages A4) à partir du rendu HTML, via html2canvas + jsPDF.
+   On capture une copie hors-écran à largeur FIXE (proche d'une vraie page A4) plutôt que le panneau
+   d'aperçu tel qu'affiché à l'écran : sinon, sur un écran étroit (mobile, ou colonne réduite),
+   le texte se met sur beaucoup plus de lignes et l'image résultante — une fois étirée à la largeur
+   A4 — devient artificiellement très haute, ce qui gonfle le nombre de pages du PDF. */
 async function buildPdfBlob(){
   if(typeof html2canvas !== 'function') throw { message:'Le générateur de PDF n’a pas pu se charger (vérifiez votre connexion).' };
   if(!window.jspdf || !window.jspdf.jsPDF) throw { message:'Le générateur de PDF n’a pas pu se charger (vérifiez votre connexion).' };
-  var canvas = await html2canvas(document.getElementById('previewPaper'), {backgroundColor:'#ffffff', scale:2});
+  var source = document.getElementById('previewPaper');
+  var A4_WIDTH_PX = 794; // ≈ 210 mm à 96 dpi
+  var holder = document.createElement('div');
+  holder.style.cssText = 'position:fixed;left:-99999px;top:0;pointer-events:none;';
+  var clone = document.createElement('div');
+  clone.className = 'pdf-export-surface';
+  clone.style.width = A4_WIDTH_PX+'px';
+  clone.innerHTML = source.innerHTML;
+  holder.appendChild(clone);
+  document.body.appendChild(holder);
+  var canvas;
+  try{
+    canvas = await html2canvas(clone, {backgroundColor:'#ffffff', scale:2, windowWidth: A4_WIDTH_PX});
+  } finally {
+    document.body.removeChild(holder);
+  }
   var jsPDF = window.jspdf.jsPDF;
   var pdf = new jsPDF({ unit:'mm', format:'a4', orientation:'portrait' });
   var pageWmm = pdf.internal.pageSize.getWidth();
