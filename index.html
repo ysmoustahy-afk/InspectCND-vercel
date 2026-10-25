@@ -166,6 +166,14 @@ table.mini .rowlabel{font-weight:600;white-space:nowrap;padding-right:8px;min-wi
 table.mini select{width:100%;border:1px solid var(--line);border-radius:5px;padding:4px 3px;font-size:0.72rem;background:var(--paper);color:var(--ink);}
 hr.sep{border:none;border-top:1px solid var(--line);margin:16px 0;}
 
+/* ---------- badge & envoi au valideur ---------- */
+.badge-count{position:absolute;top:-6px;right:-6px;background:var(--bad);color:#fff;border-radius:999px;min-width:18px;height:18px;font-size:0.68rem;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 4px;line-height:1;}
+.modal-overlay{position:fixed;inset:0;background:rgba(10,14,22,.55);display:flex;align-items:center;justify-content:center;padding:20px;z-index:60;}
+.modal-card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:22px;max-width:380px;width:100%;box-shadow:0 8px 32px rgba(0,0,0,.22);}
+.modal-card h3{font-size:1.05rem;margin-bottom:4px;}
+.modal-card select{border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:7px;padding:7px 9px;font-size:0.85rem;width:100%;}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:18px;}
+
 /* ---------- photos ---------- */
 .photo-add-label{display:inline-flex;margin:0;}
 .photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px;margin-top:10px;}
@@ -314,6 +322,7 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:16px 0;}
     <div class="topbar-actions">
       <button class="btn" id="btnPersonnel" type="button" style="display:none;">Personnel</button>
       <button class="btn" id="btnHistory" type="button">Historique</button>
+      <button class="btn" id="btnToSign" type="button" style="display:none;position:relative;">Documents à signer<span class="badge-count" id="toSignBadge" style="display:none;"></span></button>
       <button class="btn" id="btnNew" type="button">Nouveau PV</button>
       <div class="primary-actions" id="primaryActions">
         <button class="btn" id="btnPrint" type="button">Imprimer / PDF</button>
@@ -398,6 +407,22 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:16px 0;}
       </div>
     </div>
   </div>
+
+  <div id="sendValidatorModal" class="modal-overlay" style="display:none;">
+    <div class="modal-card">
+      <h3>Envoyer au valideur</h3>
+      <p class="subtle-note">Le PV va être enregistré puis envoyé directement dans le compte de la personne choisie, avec un repère « à signer ».</p>
+      <div class="field" style="margin-top:12px;">
+        <label for="validatorSelect">Valideur</label>
+        <select id="validatorSelect"></select>
+      </div>
+      <div id="sendValidatorError" class="login-error" style="display:none;"></div>
+      <div class="modal-actions">
+        <button class="btn ghost" id="btnCancelSendValidator" type="button">Annuler</button>
+        <button class="btn primary" id="btnConfirmSendValidator" type="button">Envoyer</button>
+      </div>
+    </div>
+  </div>
   </div>
 </div>
 
@@ -466,6 +491,7 @@ var LS_REPORTS_LEGACY = 'inspectcnd_reports_v1'; // ancien stockage 100% local, 
 var LS_PALETTE = 'inspectcnd_palette_v1';
 var API_BASE = '/api';
 var allReports = [];
+var histFilterMode = 'all'; // 'all' | 'toSign'
 var allPersonnel = [];
 var isAdmin = false;
 var currentUserNom = '';
@@ -1442,79 +1468,147 @@ function buildReportDoc(){
     dateControle: c.h_date || '',
     createdAtMs: (existing && existing.createdAtMs) || Date.now(),
     updatedAtMs: Date.now(),
+    validatorNom: (existing && existing.validatorNom) || '',
+    validationStatus: (existing && existing.validationStatus) || '',
+    sentAtMs: (existing && existing.sentAtMs) || null,
+    sentBy: (existing && existing.sentBy) || '',
+    validatedAtMs: (existing && existing.validatedAtMs) || null,
+    validatedBy: (existing && existing.validatedBy) || '',
     common: c,
     fields: t
   };
 }
 
-document.getElementById('btnSave').addEventListener('click', async function(){
+async function saveCurrentReport(){
   if(!state.common.h_numero || !state.common.h_piece){
-    alert('Merci de renseigner au moins le N° du PV et la pièce avant d’enregistrer.');
-    return;
+    throw { message:'Merci de renseigner au moins le N° du PV et la pièce avant d’enregistrer.', validationError:true };
   }
-  var btn = document.getElementById('btnSave');
   var docData = buildReportDoc();
+  await apiSaveReport(docData);
+  var idx = allReports.findIndex(function(r){ return r.id===docData.id; });
+  if(idx>-1){ allReports[idx]=docData; } else { allReports.push(docData); }
+  currentReportId = docData.id;
+  return docData;
+}
+document.getElementById('btnSave').addEventListener('click', async function(){
+  var btn = document.getElementById('btnSave');
   btn.disabled = true;
   var s = document.getElementById('saveStatus');
   s.textContent = 'Enregistrement…'; s.className = 'status dirty';
   try{
+    await saveCurrentReport();
+    markSaved();
+    saveDraft();
+    if(historyView.style.display!=='none') renderHistory();
+  }catch(err){
+    markDirty();
+    if(err && err.validationError){ alert(err.message); }
+    else alert('Impossible d’enregistrer sur le serveur : '+(err&&err.message||'erreur inconnue')+'. Le PV reste dans le formulaire (brouillon conservé sur ce téléphone), réessayez quand la connexion sera bonne.');
+  }finally{
+    btn.disabled = false;
+  }
+});
+
+/* ===================== ENVOI AU VALIDEUR (dans son compte, directement) ===================== */
+var sendValidatorModal = document.getElementById('sendValidatorModal');
+function openSendValidatorModal(){
+  if(!state.common.h_numero || !state.common.h_piece){
+    alert('Merci de renseigner au moins le N° du PV et la pièce avant d’envoyer.');
+    return;
+  }
+  var sel = document.getElementById('validatorSelect');
+  sel.innerHTML = '';
+  var candidates = allPersonnel.filter(function(p){ return p.nom!==currentUserNom; });
+  if(!candidates.length){
+    sel.appendChild(el('option',{value:''},[document.createTextNode('Aucun autre compte enregistré')]));
+  } else {
+    candidates.slice().sort(function(a,b){ return (a.nom||'').localeCompare(b.nom||''); }).forEach(function(p){
+      sel.appendChild(el('option',{value:p.nom},[document.createTextNode(p.nom+(p.isAdmin?' · Administrateur':''))]));
+    });
+    var preselect = state.common.ctrl_nom;
+    if(preselect && candidates.some(function(p){return p.nom===preselect;})) sel.value = preselect;
+  }
+  document.getElementById('sendValidatorError').style.display = 'none';
+  sendValidatorModal.style.display = 'flex';
+}
+function closeSendValidatorModal(){ sendValidatorModal.style.display = 'none'; }
+document.getElementById('btnSendValidateur').addEventListener('click', openSendValidatorModal);
+document.getElementById('btnCancelSendValidator').addEventListener('click', closeSendValidatorModal);
+document.getElementById('sendValidatorModal').addEventListener('click', function(e){ if(e.target===sendValidatorModal) closeSendValidatorModal(); });
+document.getElementById('btnConfirmSendValidator').addEventListener('click', async function(){
+  var sel = document.getElementById('validatorSelect');
+  var validateurNom = sel.value;
+  var errEl = document.getElementById('sendValidatorError');
+  if(!validateurNom){ errEl.textContent = 'Choisissez un valideur dans la liste.'; errEl.style.display = 'block'; return; }
+  var btn = document.getElementById('btnConfirmSendValidator');
+  btn.disabled = true; btn.textContent = 'Envoi…';
+  try{
+    var docData = buildReportDoc();
+    docData.validatorNom = validateurNom;
+    docData.validationStatus = 'pending';
+    docData.sentAtMs = Date.now();
+    docData.sentBy = currentUserNom;
+    docData.validatedAtMs = null;
+    docData.validatedBy = '';
     await apiSaveReport(docData);
     var idx = allReports.findIndex(function(r){ return r.id===docData.id; });
     if(idx>-1){ allReports[idx]=docData; } else { allReports.push(docData); }
     currentReportId = docData.id;
     markSaved();
     saveDraft();
+    updateToSignBadge();
     if(historyView.style.display!=='none') renderHistory();
+    closeSendValidatorModal();
+    alert('PV envoyé à '+validateurNom+' pour signature.');
   }catch(err){
-    markDirty();
-    alert('Impossible d’enregistrer sur le serveur : '+(err&&err.message||'erreur inconnue')+'. Le PV reste dans le formulaire (brouillon conservé sur ce téléphone), réessayez quand la connexion sera bonne.');
+    errEl.textContent = 'Impossible d’envoyer : '+(err&&err.message||'erreur inconnue');
+    errEl.style.display = 'block';
   }finally{
-    btn.disabled = false;
+    btn.disabled = false; btn.textContent = 'Envoyer';
   }
 });
-
-/* ===================== ENVOI AU VALIDEUR ===================== */
-document.getElementById('btnSendValidateur').addEventListener('click', function(){ sendToValidateur(); });
-function sendFallback(contact, validateurNom, numero, summary){
-  if(contact && contact.indexOf('@')>-1){
-    window.location.href = 'mailto:'+encodeURIComponent(contact)+'?subject='+encodeURIComponent('PV à signer — n°'+numero)+'&body='+encodeURIComponent(summary+'\n\n(Ouvrez InspectCND sur votre téléphone pour voir / imprimer le PV complet.)');
-  } else if(contact){
-    var sep = /iPhone|iPad|iPod/.test(navigator.userAgent) ? '&' : '?';
-    window.location.href = 'sms:'+encodeURIComponent(contact)+sep+'body='+encodeURIComponent(summary);
-  } else {
-    alert('Le partage direct n’est pas disponible sur cet appareil (ou aucun contact enregistré pour '+(validateurNom||'ce valideur')+'). Utilisez « Imprimer / PDF » puis envoyez le fichier manuellement.');
-  }
-}
-async function sendToValidateur(){
-  if(!state.common.h_numero || !state.common.h_piece){
-    alert('Merci de renseigner au moins le N° du PV et la pièce avant d’envoyer.');
-    return;
-  }
-  var c = state.common;
-  var validateurNom = c.ctrl_nom || '';
-  var person = allPersonnel.filter(function(p){ return p.nom===validateurNom; })[0];
-  var contact = (person && person.contact) ? person.contact.trim() : '';
-  var m = METHODS[currentType];
-  var summary = 'PV '+m.tabLabel+' n°'+c.h_numero+' — Pièce : '+(c.h_piece||'-')+(c.h_appareil ? (' — Appareil : '+c.h_appareil) : '')+'.\nMerci de vérifier et signer.'+(validateurNom ? ('\n(Valideur : '+validateurNom+')') : '');
-  var filename = suggestedPdfFilename();
-
-  if(!navigator.share){ sendFallback(contact, validateurNom, c.h_numero, summary); return; }
-
-  var wasCollapsed = ensurePreviewVisibleForOutput();
+async function signReport(r){
+  if(!confirm('Confirmer la signature de ce PV (n°'+(r.numero||'—')+') en tant que '+currentUserNom+' ?\nVotre nom, niveau et certification seront inscrits comme contrôleur sur le PV.')) return;
+  var me = allPersonnel.filter(function(p){ return p.nom===currentUserNom; })[0];
+  var updated = Object.assign({}, r, { common: Object.assign({}, r.common) });
+  updated.common.ctrl_nom = currentUserNom;
+  updated.common.ctrl_niveau = (me && me.niveau) || updated.common.ctrl_niveau || '';
+  updated.common.ctrl_certif = (me && me.certif) || updated.common.ctrl_certif || '';
+  updated.common.ctrl_date = todayISO();
+  updated.validationStatus = 'signed';
+  updated.validatedBy = currentUserNom;
+  updated.validatedAtMs = Date.now();
+  updated.updatedAtMs = Date.now();
   try{
-    var blob = await buildPdfBlob();
-    restorePreviewCollapse(wasCollapsed);
-    var file = new File([blob], filename, {type:'application/pdf'});
-    if(navigator.canShare && navigator.canShare({files:[file]})){
-      await navigator.share({files:[file], title:'PV n°'+c.h_numero, text: summary});
-    } else {
-      await navigator.share({title:'PV n°'+c.h_numero, text: summary});
+    await apiSaveReport(updated);
+    var idx = allReports.findIndex(function(x){ return x.id===updated.id; });
+    if(idx>-1){ allReports[idx]=updated; } else { allReports.push(updated); }
+    if(currentReportId===updated.id){
+      state.common = Object.assign(defaultCommon(), updated.common||{});
+      renderForm(); renderPreview();
     }
+    updateToSignBadge();
+    renderHistory();
   }catch(err){
-    restorePreviewCollapse(wasCollapsed);
-    if(err && err.name!=='AbortError'){ console.error(err); sendFallback(contact, validateurNom, c.h_numero, summary); }
+    alert('Impossible d’enregistrer la signature : '+(err&&err.message||'erreur inconnue'));
   }
 }
+function updateToSignBadge(){
+  var btn = document.getElementById('btnToSign');
+  var badge = document.getElementById('toSignBadge');
+  if(!btn || !badge) return;
+  btn.style.display = 'inline-flex';
+  var count = allReports.filter(function(r){ return r.validatorNom===currentUserNom && r.validationStatus==='pending'; }).length;
+  if(count>0){ badge.textContent = String(count); badge.style.display = 'flex'; }
+  else { badge.style.display = 'none'; }
+}
+document.getElementById('btnToSign').addEventListener('click', async function(){
+  showView('history');
+  document.getElementById('histTypeFilter').value = '';
+  document.getElementById('histSearch').value = '';
+  histFilterMode = 'toSign';
+  await refreshHistoryFromServer();
+});
 
 /* ===================== VIEWS ===================== */
 var historyView = document.getElementById('historyView');
@@ -1527,6 +1621,7 @@ function showView(v){
 }
 document.getElementById('btnHistory').addEventListener('click', async function(){
   showView('history');
+  histFilterMode = 'all';
   await refreshHistoryFromServer();
 });
 document.getElementById('btnCloseHistory').addEventListener('click', function(){ showView('form'); });
@@ -1537,6 +1632,7 @@ async function refreshHistoryFromServer(){
   list.innerHTML = '<div class="hist-empty">Chargement…</div>';
   try{
     allReports = await apiGetReports();
+    updateToSignBadge();
     renderHistory();
     maybeOfferLegacyMigration();
   }catch(err){
@@ -1683,18 +1779,24 @@ function resultChipHTML(v){
   if(v==='oui_reparation') return '<span class="result-chip warn">Après réparation</span>';
   return '<span class="result-chip none">—</span>';
 }
+function validationChipHTML(r){
+  if(r.validationStatus==='pending') return '<span class="result-chip warn">⏳ À signer — '+esc(r.validatorNom||'')+'</span>';
+  if(r.validationStatus==='signed') return '<span class="result-chip good">✔ Signé par '+esc(r.validatedBy||'')+(r.validatedAtMs?(' · '+fmtDateFR(new Date(r.validatedAtMs).toISOString().slice(0,10))):'')+'</span>';
+  return '';
+}
 function renderHistory(){
   var list = document.getElementById('histList');
   var q = (document.getElementById('histSearch').value||'').toLowerCase();
   var typeFilter = document.getElementById('histTypeFilter').value;
   var items = allReports.slice().sort(function(a,b){ return (b.createdAtMs||0)-(a.createdAtMs||0); });
+  if(histFilterMode==='toSign') items = items.filter(function(r){ return r.validatorNom===currentUserNom && r.validationStatus==='pending'; });
   if(typeFilter) items = items.filter(function(r){return r.type===typeFilter;});
   if(q) items = items.filter(function(r){
     return (r.numero||'').toLowerCase().indexOf(q)>-1 || (r.piece||'').toLowerCase().indexOf(q)>-1 || (r.appareil||'').toLowerCase().indexOf(q)>-1 || (r.commande||'').toLowerCase().indexOf(q)>-1;
   });
   list.innerHTML='';
   if(!items.length){
-    list.appendChild(el('div',{class:'hist-empty'},[document.createTextNode('Aucun PV enregistré pour ce filtre.')]));
+    list.appendChild(el('div',{class:'hist-empty'},[document.createTextNode(histFilterMode==='toSign' ? 'Aucun PV en attente de votre signature.' : 'Aucun PV enregistré pour ce filtre.')]));
     return;
   }
   items.forEach(function(r){
@@ -1706,12 +1808,20 @@ function renderHistory(){
     card.appendChild(meta);
     card.appendChild(el('span',{class:'type-chip'},[document.createTextNode(METHODS[r.type]?METHODS[r.type].tabLabel:r.type)]));
     var chipHtml = document.createElement('span'); chipHtml.innerHTML = resultChipHTML(r.resultat); card.appendChild(chipHtml.firstChild);
+    if(r.validationStatus){
+      var valChipHtml = document.createElement('span'); valChipHtml.innerHTML = validationChipHTML(r); card.appendChild(valChipHtml.firstChild);
+    }
     var actions = el('div',{class:'hist-actions'});
     var openBtn = el('button',{class:'btn', type:'button'},[document.createTextNode('Ouvrir')]);
     openBtn.addEventListener('click', function(){ loadReport(r, false); });
     var dupBtn = el('button',{class:'btn', type:'button'},[document.createTextNode('Dupliquer')]);
     dupBtn.addEventListener('click', function(){ loadReport(r, true); });
     actions.appendChild(openBtn); actions.appendChild(dupBtn);
+    if(r.validationStatus==='pending' && r.validatorNom===currentUserNom){
+      var signBtn = el('button',{class:'btn primary', type:'button'},[document.createTextNode('Signer')]);
+      signBtn.addEventListener('click', function(){ signReport(r); });
+      actions.appendChild(signBtn);
+    }
     card.appendChild(actions);
     list.appendChild(card);
   });
@@ -1793,6 +1903,7 @@ async function enterApp(){
   }
   try{
     allReports = await apiGetReports();
+    updateToSignBadge();
     if(!state.common.h_numero) suggestNumero();
     maybeOfferLegacyMigration();
   }catch(err){
