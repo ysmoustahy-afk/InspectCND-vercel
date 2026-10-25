@@ -141,10 +141,14 @@ input,select,textarea{font-family:var(--font-body);color:var(--ink);}
 .field.span-2{grid-column:span 2;}
 @media (max-width:560px){.field.span-2{grid-column:span 1;}}
 .field label{font-size:0.74rem;font-weight:600;color:var(--ink-soft);}
-.field input[type=text],.field input[type=number],.field input[type=date],.field textarea{
+.field input[type=text],.field input[type=number],.field input[type=date],.field input[type=password],.field textarea{
   border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:7px;padding:7px 9px;font-size:0.85rem;width:100%;
 }
 .field input:focus,.field textarea:focus,.field select:focus{outline:2px solid var(--accent);outline-offset:1px;}
+.password-wrap{position:relative;display:flex;}
+.password-wrap input{padding-right:38px !important;}
+.password-eye{position:absolute;right:2px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:1.05rem;line-height:1;padding:6px 8px;color:var(--ink-soft);}
+.password-eye:hover{color:var(--ink);}
 .field textarea{resize:vertical;min-height:56px;font-family:var(--font-body);}
 .check-row{display:flex;align-items:center;gap:7px;font-size:0.82rem;}
 .check-row input{width:16px;height:16px;accent-color:var(--accent);}
@@ -284,7 +288,10 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:16px 0;}
       </div>
       <div class="field" style="margin-top:10px;">
         <label for="loginPassword">Mot de passe</label>
-        <input type="password" id="loginPassword" placeholder="••••••••">
+        <div class="password-wrap">
+          <input type="password" id="loginPassword" placeholder="••••••••">
+          <button type="button" id="btnToggleLoginPassword" class="password-eye" aria-label="Afficher le mot de passe" title="Afficher le mot de passe">👁</button>
+        </div>
       </div>
       <div id="loginError" class="login-error" style="display:none;"></div>
       <button class="btn primary" id="btnLogin" type="button" style="width:100%;margin-top:16px;justify-content:center;">Se connecter</button>
@@ -320,6 +327,7 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:16px 0;}
         <option value="vert">Couleurs : Vert</option>
         <option value="violet">Couleurs : Violet</option>
       </select>
+      <span class="status" id="adminInfo" style="margin-left:4px;"></span>
       <span class="status" id="whoAmI" style="margin-left:4px;"></span>
       <button class="btn ghost" id="btnLogout" type="button">Déconnexion</button>
     </div>
@@ -1560,6 +1568,18 @@ async function migrateLegacyReports(legacy){
 function updatePersonnelVisibility(){
   document.getElementById('btnPersonnel').style.display = isAdmin ? 'inline-flex' : 'none';
 }
+function updateAdminInfo(){
+  var elInfo = document.getElementById('adminInfo');
+  if(!elInfo) return;
+  var adminPerson = allPersonnel.filter(function(p){ return p.isAdmin; })[0];
+  if(adminPerson){
+    elInfo.textContent = 'Administrateur : '+adminPerson.nom;
+  } else if(isAdmin){
+    elInfo.textContent = 'Administrateur : '+currentUserNom;
+  } else {
+    elInfo.textContent = '';
+  }
+}
 document.getElementById('btnPersonnel').addEventListener('click', async function(){
   showView('personnel');
   await refreshPersonnelFromServer();
@@ -1735,6 +1755,7 @@ async function enterApp(){
   document.getElementById('mainApp').style.display = 'block';
   document.getElementById('whoAmI').textContent = 'Connecté : '+currentUserNom+(isAdmin?' (admin)':'');
   updatePersonnelVisibility();
+  updateAdminInfo();
 
   var draftRestored = loadDraft();
   // Pré-remplit avec le nom de la personne réellement connectée (jamais un nom figé en dur) :
@@ -1753,6 +1774,7 @@ async function enterApp(){
   try{
     allPersonnel = await apiGetPersonnel();
     refreshPersonnelDatalist();
+    updateAdminInfo();
     var me = allPersonnel.filter(function(p){ return p.nom===currentUserNom; })[0];
     if(me){
       if(state.common.op_nom===currentUserNom){
@@ -1799,6 +1821,19 @@ async function doLogin(){
   }
 }
 document.getElementById('btnLogin').addEventListener('click', doLogin);
+(function(){
+  var eyeBtn = document.getElementById('btnToggleLoginPassword');
+  var pwInput = document.getElementById('loginPassword');
+  if(eyeBtn && pwInput){
+    eyeBtn.addEventListener('click', function(){
+      var showing = pwInput.type === 'text';
+      pwInput.type = showing ? 'password' : 'text';
+      eyeBtn.textContent = showing ? '👁' : '🙈';
+      eyeBtn.setAttribute('aria-label', showing ? 'Afficher le mot de passe' : 'Masquer le mot de passe');
+      eyeBtn.setAttribute('title', showing ? 'Afficher le mot de passe' : 'Masquer le mot de passe');
+    });
+  }
+})();
 document.getElementById('loginPassword').addEventListener('keydown', function(e){ if(e.key==='Enter') doLogin(); });
 document.getElementById('loginNom').addEventListener('keydown', function(e){ if(e.key==='Enter') document.getElementById('loginPassword').focus(); });
 document.getElementById('btnLogout').addEventListener('click', function(){
