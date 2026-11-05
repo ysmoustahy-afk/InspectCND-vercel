@@ -27,6 +27,9 @@
   --font-display:'IBM Plex Sans',system-ui,sans-serif;
   --font-body:'IBM Plex Sans',system-ui,sans-serif;
   --font-mono:'IBM Plex Mono',ui-monospace,monospace;
+  --shadow-sm:0 1px 2px rgba(20,28,45,.05), 0 1px 1px rgba(20,28,45,.04);
+  --shadow-md:0 6px 20px -4px rgba(20,28,45,.12), 0 2px 6px -2px rgba(20,28,45,.08);
+  --shadow-lg:0 16px 40px -8px rgba(20,28,45,.16), 0 4px 12px -2px rgba(20,28,45,.08);
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
@@ -38,6 +41,9 @@
     --good:#3fcf82; --good-soft:#123322;
     --bad:#ff6b80; --bad-soft:#3a1620;
     --warn:#e8b653; --warn-soft:#3a2c05;
+    --shadow-sm:0 1px 2px rgba(0,0,0,.3);
+    --shadow-md:0 6px 20px -4px rgba(0,0,0,.45), 0 2px 6px -2px rgba(0,0,0,.3);
+    --shadow-lg:0 16px 40px -8px rgba(0,0,0,.55), 0 4px 12px -2px rgba(0,0,0,.3);
   }
 }
 :root[data-theme="dark"]{
@@ -49,6 +55,9 @@
   --good:#3fcf82; --good-soft:#123322;
   --bad:#ff6b80; --bad-soft:#3a1620;
   --warn:#e8b653; --warn-soft:#3a2c05;
+  --shadow-sm:0 1px 2px rgba(0,0,0,.3);
+  --shadow-md:0 6px 20px -4px rgba(0,0,0,.45), 0 2px 6px -2px rgba(0,0,0,.3);
+  --shadow-lg:0 16px 40px -8px rgba(0,0,0,.55), 0 4px 12px -2px rgba(0,0,0,.3);
 }
 
 /* ---------- palettes de couleurs (choix de l’utilisateur, barre du haut) ---------- */
@@ -77,18 +86,27 @@ input,select,textarea{font-family:var(--font-body);color:var(--ink);}
 .login-error{background:var(--bad-soft);color:var(--bad);border-radius:8px;padding:8px 10px;font-size:0.8rem;margin-top:12px;}
 
 /* ---------- top bar ---------- */
-.topbar{display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between;margin-bottom:16px;}
-.brand{display:flex;flex-direction:column;gap:2px;}
-.brand h1{font-size:1.4rem;font-weight:700;letter-spacing:-0.01em;}
-.brand p{margin:0;color:var(--ink-soft);font-size:0.82rem;}
-.tabs{display:flex;gap:6px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:4px;}
-.tab{border:none;background:transparent;padding:8px 14px;border-radius:7px;font-size:0.85rem;font-weight:600;color:var(--ink-soft);}
-.tab[aria-selected="true"]{background:var(--accent);color:var(--accent-ink);}
+.topbar{position:sticky;top:0;z-index:40;display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between;margin:-18px -16px 18px;padding:14px 16px;background:color-mix(in srgb, var(--paper) 88%, transparent);backdrop-filter:blur(10px) saturate(1.3);-webkit-backdrop-filter:blur(10px) saturate(1.3);border-bottom:1px solid var(--line);}
+.brand{display:flex;align-items:center;gap:10px;}
+.brand-mark{width:34px;height:34px;flex:none;border-radius:9px;background:linear-gradient(155deg, var(--accent), color-mix(in srgb, var(--accent) 70%, #000 15%));display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-sm);}
+.brand-mark svg{width:19px;height:19px;color:var(--accent-ink);}
+.brand-text{display:flex;flex-direction:column;gap:1px;}
+.brand h1{font-size:1.28rem;font-weight:800;letter-spacing:-0.015em;}
+.brand p{margin:0;color:var(--ink-soft);font-size:0.78rem;}
+.tabs{display:flex;gap:6px;background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:4px;}
+.tab{border:none;background:transparent;padding:8px 14px;border-radius:7px;font-size:0.85rem;font-weight:600;color:var(--ink-soft);transition:background .15s ease, color .15s ease;}
+.tab[aria-selected="true"]{background:var(--accent);color:var(--accent-ink);box-shadow:var(--shadow-sm);}
 .topbar-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
-.btn{border:1px solid var(--line-strong);background:var(--surface);color:var(--ink);border-radius:8px;padding:8px 13px;font-size:0.82rem;font-weight:600;display:inline-flex;align-items:center;gap:6px;}
-.btn:hover{border-color:var(--accent);}
+.btn-group{display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
+.topbar-divider{width:1px;align-self:stretch;min-height:22px;background:var(--line);margin:0 1px;}
+@media (max-width:960px){.topbar-divider{display:none;}}
+.btn{border:1px solid var(--line-strong);background:var(--surface);color:var(--ink);border-radius:9px;padding:8px 13px;font-size:0.82rem;font-weight:600;display:inline-flex;align-items:center;gap:7px;box-shadow:var(--shadow-sm);transition:border-color .15s ease, box-shadow .15s ease, transform .1s ease;}
+.btn svg{width:15px;height:15px;flex:none;}
+.btn:hover{border-color:var(--accent);box-shadow:var(--shadow-md);}
+.btn:active{transform:translateY(1px);}
 .btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);}
-.btn.ghost{border-color:transparent;background:transparent;}
+.btn.ghost{border-color:transparent;background:transparent;box-shadow:none;}
+.btn.ghost:hover{box-shadow:none;background:var(--surface-2);}
 .btn:disabled{opacity:0.45;cursor:not-allowed;}
 .primary-actions{display:flex;gap:8px;}
 #btnTogglePreview{display:none;}
@@ -96,7 +114,7 @@ input,select,textarea{font-family:var(--font-body);color:var(--ink);}
 /* ---------- layout ---------- */
 .grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:start;}
 @media (max-width:960px){.grid{grid-template-columns:1fr;}}
-.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden;}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:var(--shadow-sm);}
 .panel-head{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 16px;border-bottom:1px solid var(--line);background:var(--surface-2);}
 .panel-head h2{font-size:0.95rem;font-weight:700;}
 .panel-body{padding:16px;max-height:calc(100vh - 190px);overflow:auto;}
@@ -270,11 +288,36 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:16px 0;}
 .hist-empty{padding:30px;text-align:center;color:var(--ink-faint);font-size:0.85rem;}
 .db-banner{background:var(--warn-soft);color:var(--warn);border:1px solid var(--warn);border-radius:8px;padding:8px 12px;font-size:0.8rem;margin-bottom:12px;display:none;}
 
+/* ---------- tableau de bord ---------- */
+.dash-hero{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:18px;}
+.dash-hero h2{font-size:1.35rem;font-weight:800;letter-spacing:-0.01em;}
+.dash-hero .subtle-note{margin-top:2px;}
+.kpi-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:18px;}
+@media (max-width:960px){.kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr));}}
+@media (max-width:560px){.kpi-grid{grid-template-columns:1fr;}}
+.kpi-tile{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px 18px;box-shadow:var(--shadow-sm);display:flex;flex-direction:column;gap:8px;}
+.kpi-tile .kpi-top{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.kpi-tile .kpi-icon{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex:none;background:var(--accent-soft);color:var(--accent);}
+.kpi-tile .kpi-icon svg{width:16px;height:16px;}
+.kpi-tile.kpi-warn .kpi-icon{background:var(--warn-soft);color:var(--warn);}
+.kpi-tile.kpi-good .kpi-icon{background:var(--good-soft);color:var(--good);}
+.kpi-tile .kpi-value{font-family:var(--font-mono);font-size:1.7rem;font-weight:700;letter-spacing:-0.01em;line-height:1;}
+.kpi-tile .kpi-label{font-size:0.78rem;color:var(--ink-soft);font-weight:600;}
+.kpi-tile .kpi-sub{font-size:0.7rem;color:var(--ink-faint);}
+.method-bar-row{display:flex;flex-direction:column;gap:5px;margin-bottom:16px;}
+.method-bar-row:last-child{margin-bottom:0;}
+.method-bar-top{display:flex;justify-content:space-between;font-size:0.8rem;font-weight:600;}
+.method-bar-top .count{font-family:var(--font-mono);color:var(--ink-soft);font-weight:600;}
+.method-bar-track{height:9px;border-radius:5px;background:var(--surface-2);overflow:hidden;}
+.method-bar-fill{height:100%;border-radius:5px;background:var(--accent);transition:width .4s ease;}
+.dash-empty{padding:24px 10px;text-align:center;color:var(--ink-faint);font-size:0.85rem;}
+
 /* ---------- print ---------- */
 @media print{
   @page{size:A4;margin:12mm;}
+  html{-webkit-text-size-adjust:100%;text-size-adjust:100%;}
   body{padding:0 !important;}
-  #loginView,.topbar,#historyView,#personnelView,#sendValidatorModal{display:none !important;}
+  #loginView,.topbar,#dashboardView,#historyView,#personnelView,#sendValidatorModal{display:none !important;}
   #formView{display:block !important;}
   #formView .grid{display:block !important;}
   #formView .grid > .panel:first-child{display:none !important;}
@@ -321,21 +364,29 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:16px 0;}
   <datalist id="dlPersonnel"></datalist>
   <div class="topbar">
     <div class="brand">
-      <h1 id="brandTitle" style="user-select:none;">InspectCND</h1>
-      <p>Ressuage · Magnétoscopie · Visuel indirect par endoscopie</p>
+      <div class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l7 3v6c0 5-3.5 8.5-7 10-3.5-1.5-7-5-7-10V5l7-3Z"/><path d="M9 12l2 2 4-4"/></svg></div>
+      <div class="brand-text">
+        <h1 id="brandTitle" style="user-select:none;">InspectCND</h1>
+        <p>Ressuage · Magnétoscopie · Visuel indirect par endoscopie</p>
+      </div>
     </div>
     <div class="tabs" role="tablist" id="typeTabs"></div>
     <div class="topbar-actions">
-      <button class="btn" id="btnPersonnel" type="button" style="display:none;">Personnel</button>
-      <button class="btn" id="btnHistory" type="button">Historique</button>
-      <button class="btn" id="btnToSign" type="button" style="display:none;position:relative;">Documents à signer<span class="badge-count" id="toSignBadge" style="display:none;"></span></button>
-      <button class="btn" id="btnNew" type="button">Nouveau PV</button>
-      <div class="primary-actions" id="primaryActions">
-        <button class="btn" id="btnPrint" type="button">Imprimer / PDF</button>
-        <button class="btn" id="btnSharePdf" type="button">Partager en PDF</button>
-        <button class="btn" id="btnSendValidateur" type="button">Envoyer au valideur</button>
-        <button class="btn primary" id="btnSave" type="button">Enregistrer le PV</button>
+      <div class="btn-group">
+        <button class="btn" id="btnDashboard" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span>Tableau de bord</span></button>
+        <button class="btn" id="btnPersonnel" type="button" style="display:none;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c0-3.5 3-6 7-6s7 2.5 7 6"/></svg><span>Personnel</span></button>
+        <button class="btn" id="btnHistory" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3.5 2"/></svg><span>Historique</span></button>
+        <button class="btn" id="btnToSign" type="button" style="display:none;position:relative;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l1-4L16 5l3 3L8 19l-4 1Z"/><path d="M14 7l3 3"/></svg><span>Documents à signer</span><span class="badge-count" id="toSignBadge" style="display:none;"></span></button>
       </div>
+      <span class="topbar-divider"></span>
+      <button class="btn" id="btnNew" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h7l4 4v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"/><path d="M14 3v4h4"/><path d="M12 12v5M9.5 14.5h5"/></svg><span>Nouveau PV</span></button>
+      <div class="primary-actions" id="primaryActions">
+        <button class="btn" id="btnPrint" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V4h12v5"/><rect x="4" y="9" width="16" height="7" rx="1.5"/><path d="M6 14h12v6H6z"/></svg><span>Imprimer / PDF</span></button>
+        <button class="btn" id="btnSharePdf" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="12" r="2.3"/><circle cx="17" cy="5.5" r="2.3"/><circle cx="17" cy="18.5" r="2.3"/><path d="M8.1 10.8 14.9 6.8M8.1 13.2l6.8 4"/></svg><span>Partager en PDF</span></button>
+        <button class="btn" id="btnSendValidateur" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 3 3 10.5l7 2.5 2 7L21 3Z"/><path d="M10.5 13 21 3"/></svg><span>Envoyer au valideur</span></button>
+        <button class="btn primary" id="btnSave" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.5 2.5L16 9.5"/></svg><span>Enregistrer le PV</span></button>
+      </div>
+      <span class="topbar-divider"></span>
       <select id="paletteSelect" class="btn" style="padding:6px 8px;" title="Couleurs de l’application">
         <option value="alstom">Couleurs : Alstom</option>
         <option value="classic">Couleurs : Bleu / jaune</option>
@@ -344,11 +395,32 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:16px 0;}
       </select>
       <span class="status" id="adminInfo" style="margin-left:4px;"></span>
       <span class="status" id="whoAmI" style="margin-left:4px;"></span>
-      <button class="btn ghost" id="btnLogout" type="button">Déconnexion</button>
+      <button class="btn ghost" id="btnLogout" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h3"/><path d="M15 16l4-4-4-4"/><path d="M19 12H9"/></svg><span>Déconnexion</span></button>
     </div>
   </div>
 
-  <div id="formView">
+  <div id="dashboardView" style="display:none;">
+    <div class="dash-hero">
+      <div>
+        <h2 id="dashGreeting">Bonjour</h2>
+        <p class="subtle-note" id="dashSubtitle">Vue d'ensemble de vos PV de contrôle.</p>
+      </div>
+      <button class="btn primary" id="btnDashNew" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h7l4 4v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"/><path d="M14 3v4h4"/><path d="M12 12v5M9.5 14.5h5"/></svg><span>Nouveau PV</span></button>
+    </div>
+    <div class="kpi-grid" id="kpiGrid"></div>
+    <div class="grid">
+      <div class="panel">
+        <div class="panel-head"><h2>Répartition par méthode</h2></div>
+        <div class="panel-body" id="methodBreakdown"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h2>PV récents</h2><button class="btn ghost" id="btnDashSeeAll" type="button">Voir tout l'historique</button></div>
+        <div class="hist-list" id="dashRecentList" style="padding:14px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="formView" style="display:none;">
     <div class="grid">
       <div class="panel">
         <div class="panel-head">
@@ -1429,6 +1501,42 @@ async function sharePdf(){
     btn.disabled = false;
   }
 }
+/* Calcule un facteur de réduction (police racine) pour être sûr que le PV tienne sur une seule page
+   à l'impression, même si l'appareil/imprimante utilise du papier Letter (plus court que l'A4) ou
+   ignore nos marges CSS — on mesure donc dans le pire des cas réaliste (largeur A4, hauteur Letter).
+   Les tailles du PV sont en « rem », toujours relatives à la racine <html> (pas au parent) : on doit
+   donc changer la taille de police de la racine elle-même pour mesurer, puis la restaurer aussitôt. */
+function computePrintFitScale(){
+  var source = document.getElementById('previewPaper');
+  if(!source) return 1;
+  var TARGET_WIDTH_PX = 703;  // largeur utile A4 à 96dpi avec marges de 12mm (le plus étroit des deux formats)
+  var TARGET_HEIGHT_PX = 940; // hauteur utile Letter à 96dpi avec marges de 12mm, avec une petite marge de sécurité
+  var holder = document.createElement('div');
+  holder.style.cssText = 'position:fixed;left:-99999px;top:0;pointer-events:none;';
+  var clone = document.createElement('div');
+  clone.className = 'pdf-export-surface';
+  clone.style.width = TARGET_WIDTH_PX+'px';
+  clone.style.padding = '0px';
+  clone.innerHTML = source.innerHTML;
+  holder.appendChild(clone);
+  document.body.appendChild(holder);
+  var htmlEl = document.documentElement;
+  var prevFontSize = htmlEl.style.fontSize;
+  function heightAtPct(pct){ htmlEl.style.fontSize = pct+'%'; return clone.scrollHeight; }
+  var scale = 1;
+  var h100 = heightAtPct(100);
+  if(h100 > TARGET_HEIGHT_PX){
+    var lo = 78, hi = 100, best = 78;
+    for(var i=0;i<7;i++){
+      var mid = (lo+hi)/2;
+      if(heightAtPct(mid) <= TARGET_HEIGHT_PX){ best = mid; lo = mid; } else { hi = mid; }
+    }
+    scale = best/100; // jamais en dessous de 78 % (garde une taille lisible)
+  }
+  htmlEl.style.fontSize = prevFontSize;
+  document.body.removeChild(holder);
+  return scale;
+}
 async function printOrShare(){
   var isStandalone = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone === true;
   /* Le blocage de window.print() en mode « application » n'existe que sur iOS/iPadOS (Safari).
@@ -1436,10 +1544,14 @@ async function printOrShare(){
      normalement : on ne bascule sur le partage PDF que sur iPhone/iPad en mode application. */
   if(!(isStandalone && isIOSDevice())){
     var wasCollapsed = ensurePreviewVisibleForOutput();
+    var htmlEl = document.documentElement;
+    var prevFontSize = htmlEl.style.fontSize;
+    var scale = computePrintFitScale();
+    if(scale < 1) htmlEl.style.fontSize = (scale*100)+'%';
     var restoredOnce = false;
-    var doRestore = function(){ if(restoredOnce) return; restoredOnce = true; restorePreviewCollapse(wasCollapsed); window.removeEventListener('afterprint', doRestore); };
+    var doRestore = function(){ if(restoredOnce) return; restoredOnce = true; htmlEl.style.fontSize = prevFontSize; restorePreviewCollapse(wasCollapsed); window.removeEventListener('afterprint', doRestore); };
     window.addEventListener('afterprint', doRestore);
-    setTimeout(doRestore, 2000); // filet de sécurité si « afterprint » ne se déclenche pas (certains navigateurs mobiles)
+    setTimeout(doRestore, 2500); // filet de sécurité si « afterprint » ne se déclenche pas (certains navigateurs mobiles)
     try{ window.print(); }catch(e){ console.error('print error', e); doRestore(); }
     return;
   }
@@ -1620,17 +1732,33 @@ document.getElementById('btnToSign').addEventListener('click', async function(){
 var historyView = document.getElementById('historyView');
 var formView = document.getElementById('formView');
 var personnelView = document.getElementById('personnelView');
+var dashboardView = document.getElementById('dashboardView');
 function showView(v){
+  dashboardView.style.display = (v==='dashboard') ? 'block' : 'none';
   formView.style.display = (v==='form') ? 'block' : 'none';
   historyView.style.display = (v==='history') ? 'block' : 'none';
   personnelView.style.display = (v==='personnel') ? 'block' : 'none';
+  if(tabsEl) tabsEl.style.display = (v==='form') ? '' : 'none';
+  var primaryActionsEl = document.getElementById('primaryActions');
+  if(primaryActionsEl) primaryActionsEl.style.display = (v==='form') ? '' : 'none';
 }
+document.getElementById('btnDashboard').addEventListener('click', async function(){
+  showView('dashboard');
+  await refreshHistoryFromServer();
+  renderDashboard();
+});
+document.getElementById('btnDashNew').addEventListener('click', function(){ document.getElementById('btnNew').click(); });
+document.getElementById('btnDashSeeAll').addEventListener('click', async function(){
+  showView('history');
+  histFilterMode = 'all';
+  await refreshHistoryFromServer();
+});
 document.getElementById('btnHistory').addEventListener('click', async function(){
   showView('history');
   histFilterMode = 'all';
   await refreshHistoryFromServer();
 });
-document.getElementById('btnCloseHistory').addEventListener('click', function(){ showView('form'); });
+document.getElementById('btnCloseHistory').addEventListener('click', function(){ showView('dashboard'); renderDashboard(); });
 document.getElementById('histSearch').addEventListener('input', renderHistory);
 document.getElementById('histTypeFilter').addEventListener('change', renderHistory);
 async function refreshHistoryFromServer(){
@@ -1686,7 +1814,7 @@ document.getElementById('btnPersonnel').addEventListener('click', async function
   showView('personnel');
   await refreshPersonnelFromServer();
 });
-document.getElementById('btnClosePersonnel').addEventListener('click', function(){ showView('form'); });
+document.getElementById('btnClosePersonnel').addEventListener('click', function(){ showView('dashboard'); renderDashboard(); });
 async function refreshPersonnelFromServer(){
   var list = document.getElementById('personnelList');
   list.innerHTML = '<div class="hist-empty">Chargement…</div>';
@@ -1790,6 +1918,95 @@ function validationChipHTML(r){
   if(r.validationStatus==='signed') return '<span class="result-chip good">✔ Signé par '+esc(r.validatedBy||'')+(r.validatedAtMs?(' · '+fmtDateFR(new Date(r.validatedAtMs).toISOString().slice(0,10))):'')+'</span>';
   return '';
 }
+
+/* ===================== TABLEAU DE BORD ===================== */
+var DASH_ICONS = {
+  total:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h7l4 4v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"/><path d="M14 3v4h4"/><path d="M9 13h6M9 16.5h6"/></svg>',
+  month:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9h18M8 3v4M16 3v4"/></svg>',
+  rate:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.5 2.5L16 9.5"/></svg>',
+  sign:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l1-4L16 5l3 3L8 19l-4 1Z"/><path d="M14 7l3 3"/></svg>'
+};
+function fmtMonthFR(d){
+  var months = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+  return months[d.getMonth()]+' '+d.getFullYear();
+}
+function renderDashboard(){
+  var greetingEl = document.getElementById('dashGreeting');
+  if(greetingEl) greetingEl.textContent = 'Bonjour, '+currentUserNom;
+  var now = new Date();
+  var monthStart = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+  var total = allReports.length;
+  var thisMonth = allReports.filter(function(r){ return (r.createdAtMs||0) >= monthStart; }).length;
+  var withResult = allReports.filter(function(r){ return r.resultat==='oui' || r.resultat==='non' || r.resultat==='oui_reparation'; });
+  var acceptable = allReports.filter(function(r){ return r.resultat==='oui'; }).length;
+  var rate = withResult.length ? Math.round(acceptable/withResult.length*100) : null;
+  var toSign = allReports.filter(function(r){ return r.validatorNom===currentUserNom && r.validationStatus==='pending'; }).length;
+
+  var kpis = [
+    { icon:DASH_ICONS.total, cls:'', value:String(total), label:'PV enregistrés', sub:'toutes méthodes confondues' },
+    { icon:DASH_ICONS.month, cls:'', value:String(thisMonth), label:'Ce mois-ci', sub:fmtMonthFR(now) },
+    { icon:DASH_ICONS.rate, cls:'kpi-good', value:(rate===null?'—':rate+' %'), label:'Taux d’acceptation', sub:withResult.length+' PV avec résultat renseigné' },
+    { icon:DASH_ICONS.sign, cls:'kpi-warn', value:String(toSign), label:'À signer pour moi', sub:(toSign?'en attente de votre signature':'rien en attente') }
+  ];
+  var kpiGrid = document.getElementById('kpiGrid');
+  kpiGrid.innerHTML = '';
+  kpis.forEach(function(k){
+    var tile = el('div',{class:'kpi-tile '+k.cls});
+    var top = el('div',{class:'kpi-top'});
+    var iconWrap = document.createElement('div'); iconWrap.className = 'kpi-icon'; iconWrap.innerHTML = k.icon;
+    top.appendChild(iconWrap);
+    tile.appendChild(top);
+    tile.appendChild(el('div',{class:'kpi-value'},[document.createTextNode(k.value)]));
+    tile.appendChild(el('div',{class:'kpi-label'},[document.createTextNode(k.label)]));
+    tile.appendChild(el('div',{class:'kpi-sub'},[document.createTextNode(k.sub)]));
+    kpiGrid.appendChild(tile);
+  });
+
+  var breakdown = document.getElementById('methodBreakdown');
+  breakdown.innerHTML = '';
+  var counts = { PT:0, MT:0, VT:0 };
+  allReports.forEach(function(r){ if(counts.hasOwnProperty(r.type)) counts[r.type]++; });
+  if(!total){
+    breakdown.appendChild(el('div',{class:'dash-empty'},[document.createTextNode('Aucun PV enregistré pour le moment.')]));
+  } else {
+    var maxCount = Math.max(1, counts.PT, counts.MT, counts.VT);
+    ['PT','MT','VT'].forEach(function(key){
+      var row = el('div',{class:'method-bar-row'});
+      var top = el('div',{class:'method-bar-top'});
+      top.appendChild(el('span',{},[document.createTextNode(METHODS[key].tabLabel)]));
+      top.appendChild(el('span',{class:'count'},[document.createTextNode(String(counts[key]))]));
+      row.appendChild(top);
+      var track = el('div',{class:'method-bar-track'});
+      var fill = el('div',{class:'method-bar-fill'});
+      fill.style.width = (counts[key]/maxCount*100)+'%';
+      track.appendChild(fill);
+      row.appendChild(track);
+      breakdown.appendChild(row);
+    });
+  }
+
+  var recentList = document.getElementById('dashRecentList');
+  recentList.innerHTML = '';
+  var recent = allReports.slice().sort(function(a,b){ return (b.createdAtMs||0)-(a.createdAtMs||0); }).slice(0,6);
+  if(!recent.length){
+    recentList.appendChild(el('div',{class:'hist-empty'},[document.createTextNode('Aucun PV pour le moment — créez votre premier PV.')]));
+  } else {
+    recent.forEach(function(r){
+      var card = el('div',{class:'hist-card'});
+      card.appendChild(el('div',{class:'hist-num mono'},[document.createTextNode('N° '+(r.numero||'—'))]));
+      var meta = el('div',{class:'hist-meta'});
+      meta.appendChild(el('div',{class:'p1'},[document.createTextNode((r.piece||'Pièce non renseignée'))]));
+      meta.appendChild(el('div',{class:'p2'},[document.createTextNode((r.dateControle? fmtDateFR(r.dateControle)+' · ' : '')+(r.createdBy?('par '+r.createdBy):''))]));
+      card.appendChild(meta);
+      card.appendChild(el('span',{class:'type-chip'},[document.createTextNode(METHODS[r.type]?METHODS[r.type].tabLabel:r.type)]));
+      var chipHtml = document.createElement('span'); chipHtml.innerHTML = resultChipHTML(r.resultat); card.appendChild(chipHtml.firstChild);
+      var openBtn = el('button',{class:'btn ghost', type:'button'},[document.createTextNode('Ouvrir')]);
+      openBtn.addEventListener('click', function(){ loadReport(r, false); });
+      card.appendChild(openBtn);
+      recentList.appendChild(card);
+    });
+  }
+}
 function renderHistory(){
   var list = document.getElementById('histList');
   var q = (document.getElementById('histSearch').value||'').toLowerCase();
@@ -1872,6 +2089,8 @@ async function enterApp(){
   document.getElementById('whoAmI').textContent = 'Connecté : '+currentUserNom+(isAdmin?' (admin)':'');
   updatePersonnelVisibility();
   updateAdminInfo();
+  showView('dashboard');
+  renderDashboard();
 
   var draftRestored = loadDraft();
   // Pré-remplit avec le nom de la personne réellement connectée (jamais un nom figé en dur) :
@@ -1910,6 +2129,7 @@ async function enterApp(){
   try{
     allReports = await apiGetReports();
     updateToSignBadge();
+    renderDashboard();
     if(!state.common.h_numero) suggestNumero();
     maybeOfferLegacyMigration();
   }catch(err){
