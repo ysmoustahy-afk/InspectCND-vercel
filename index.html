@@ -317,7 +317,7 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:16px 0;}
   @page{size:A4;margin:12mm;}
   html{-webkit-text-size-adjust:100%;text-size-adjust:100%;}
   body{padding:0 !important;}
-  #loginView,.topbar,#dashboardView,#historyView,#personnelView,#sendValidatorModal{display:none !important;}
+  #loginView,.topbar,#dashboardView,#historyView,#personnelView,#settingsView,#sendValidatorModal{display:none !important;}
   #formView{display:block !important;}
   #formView .grid{display:block !important;}
   #formView .grid > .panel:first-child{display:none !important;}
@@ -375,6 +375,7 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:16px 0;}
       <div class="btn-group">
         <button class="btn" id="btnDashboard" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span>Tableau de bord</span></button>
         <button class="btn" id="btnPersonnel" type="button" style="display:none;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c0-3.5 3-6 7-6s7 2.5 7 6"/></svg><span>Personnel</span></button>
+        <button class="btn" id="btnSettings" type="button" style="display:none;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 13a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1.04 1.56V19a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1.04-1.56 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.56-1.04H2a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.56-1.04 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34H8a1.7 1.7 0 0 0 1.04-1.56V2a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1.04 1.56 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87V8a1.7 1.7 0 0 0 1.56 1.04H22a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.56 1.04Z"/></svg><span>Paramètres</span></button>
         <button class="btn" id="btnHistory" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3.5 2"/></svg><span>Historique</span></button>
         <button class="btn" id="btnToSign" type="button" style="display:none;position:relative;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l1-4L16 5l3 3L8 19l-4 1Z"/><path d="M14 7l3 3"/></svg><span>Documents à signer</span><span class="badge-count" id="toSignBadge" style="display:none;"></span></button>
       </div>
@@ -454,6 +455,8 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:16px 0;}
             <option value="PT">Ressuage</option>
             <option value="MT">Magnétoscopie</option>
             <option value="VT">Endoscopie</option>
+            <option value="UT">Ultrasons</option>
+            <option value="RT">Radiographie</option>
           </select>
         </div>
         <div class="hist-list" id="histList"></div>
@@ -486,6 +489,32 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:16px 0;}
     </div>
   </div>
 
+  <div id="settingsView" style="display:none;">
+    <div class="panel">
+      <div class="panel-head">
+        <h2>Paramètres — en-tête des PV</h2>
+        <button class="btn ghost" id="btnCloseSettings" type="button">Fermer</button>
+      </div>
+      <div class="panel-body" style="max-height:none;">
+        <div class="subtle-note" id="settingsAdminNote" style="margin-bottom:14px;">Nom, adresse et logo affichés en haut de chaque PV (Ressuage, Magnétoscopie, Endoscopie, Ultrasons, Radiographie). Utile si vous réutilisez cette application pour une autre société.</div>
+        <div class="field-grid cols-3" id="settingsForm">
+          <div class="field span-2"><label for="setOrgName">Nom de la société</label><input type="text" id="setOrgName" placeholder="ex. Alstom Crespin S.A.S"></div>
+          <div class="field"><label for="setOrgAddress1">Adresse — ligne 1</label><input type="text" id="setOrgAddress1" placeholder="ex. 1 Place des Ateliers"></div>
+          <div class="field span-2"><label for="setOrgAddress2">Adresse — ligne 2</label><input type="text" id="setOrgAddress2" placeholder="ex. 59154 CRESPIN, France"></div>
+          <div class="field">
+            <label>Logo</label>
+            <div style="display:flex;align-items:center;gap:10px;margin-top:4px;">
+              <img id="setLogoPreview" src="" alt="logo" style="max-height:34px;max-width:120px;object-fit:contain;display:none;border:1px solid var(--line);border-radius:6px;padding:4px;background:#fff;">
+              <label class="btn photo-add-label" style="margin:0;">Changer<input type="file" id="setLogoInput" accept="image/*" style="display:none;"></label>
+            </div>
+          </div>
+          <div class="field" style="grid-column:1/-1;"><button class="btn primary" id="btnSaveSettings" type="button">Enregistrer les paramètres</button></div>
+        </div>
+        <div id="settingsStatus" class="subtle-note" style="margin-top:10px;"></div>
+      </div>
+    </div>
+  </div>
+
   <div id="sendValidatorModal" class="modal-overlay" style="display:none;">
     <div class="modal-card">
       <h3>Envoyer au valideur</h3>
@@ -511,10 +540,12 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:16px 0;}
 /* ===================== METHOD DEFINITIONS ===================== */
 var METHODS = {
   PT: { key:'PT', tabLabel:'Ressuage', titleFr:'Rapport de Contrôle par ressuage', titleEn:'Liquid Penetrant Test Report', defaultDocRef:'QUA-RS-RPI-FRM-007 Version 2', defaultDocDate:'16/12/2024' },
-  MT: { key:'MT', tabLabel:'Magnétoscopie', titleFr:'Rapport de Contrôle par magnétoscopie', titleEn:'Magnetic Particle Test Report', defaultDocRef:'', defaultDocDate:'' },
-  VT: { key:'VT', tabLabel:'Endoscopie', titleFr:'Rapport de Contrôle visuel indirect par endoscopie', titleEn:'Indirect Visual (Remote / Endoscope) Test Report', defaultDocRef:'', defaultDocDate:'' }
+  MT: { key:'MT', tabLabel:'Magnétoscopie', titleFr:'Fiche de relevé des caractéristiques de l’installation et certificat d’examen magnétoscopie', titleEn:'', defaultDocRef:'QUA-RS-RPI-FRM-024 Version A', defaultDocDate:'13/01/2022', formRef:'REF-RPI-TEM-001 rév.A 05.11.2021', indexClassement:'58-2', amsDoc:'' },
+  VT: { key:'VT', tabLabel:'Endoscopie', titleFr:'Rapport de Contrôle visuel indirect par endoscopie', titleEn:'Indirect Visual (Remote / Endoscope) Test Report', defaultDocRef:'', defaultDocDate:'' },
+  UT: { key:'UT', tabLabel:'Ultrasons', titleFr:'Rapport de Contrôle par ultrasons', titleEn:'Ultrasonic Test Report', defaultDocRef:'', defaultDocDate:'' },
+  RT: { key:'RT', tabLabel:'Radiographie', titleFr:'Rapport de Contrôle par radiographie', titleEn:'Radiographic Test Report', defaultDocRef:'', defaultDocDate:'' }
 };
-var TYPE_ORDER = ['PT','MT','VT'];
+var TYPE_ORDER = ['PT','MT','VT','UT','RT'];
 
 var todayISO = function(){ var d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); };
 var todayFR = function(){ var d=new Date(); return String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear(); };
@@ -540,13 +571,27 @@ function defaultPT(){
   return o;
 }
 function defaultMT(){
-  var o = { a_objet:'', a_etendue:'', a_etendueFreq:'', a_etatSurface:[], a_temperature:'',
-    a_typeCourant:'', a_methodeAimant:'', a_intensite:'', a_verifIndicateur:'', a_indicateurRef:'',
-    a_demagnetisation:'', a_valeurResiduelle:'',
-    b_eclairageNat:false, b_eclairageArt:false, b_eclairageValeur:'', b_lampeUVA:false, b_intensiteUV:'', b_indications:'' };
-  ['produit','nettoyage'].forEach(function(r){
-    ['ref','lot','peremption','appli','temps'].forEach(function(c){ o['a_t_'+r+'_'+c]=''; });
-    o['a_t_'+r+'_sechage']='';
+  var o = {
+    a_contrat:'', a_destinataire:'',
+    a_refCdeAT:'', a_refCdeATDate:'', a_marcheClient:'', a_marcheClientDate:'',
+    a_procGenerale:'', a_procParticuliere:'',
+    a_stadeFabrication:'',
+    a_appareilPortatif:'portatif', a_appareilAutrePrecision:'', a_appareilType:'', a_appareilMarque:'', a_appareilAnnee:'',
+    a_ecartementTouches:'', a_modeAimantation:'', a_typeCourant:'',
+    a_entretienPar:'', a_entretienFreq:'', a_entretienEnregistrement:'',
+    a_temoinC:false,
+    a_pieceDesignation:'', a_pieceRepere:'', a_nbExamine:'', a_nbConformeSansRetouche:'', a_nbConformeApresRetouche:'',
+    a_commentaires:'', a_demagnetisationTexte:'',
+    b_eclairageNat:false, b_eclairageArt:false, b_eclairageValeur:'', b_lampeUVA:false, b_intensiteUV:'', b_indications:''
+  };
+  ['degraissant','liqueur','contrastant'].forEach(function(r){
+    ['marque','lot','peremption'].forEach(function(c){ o['a_t_'+r+'_'+c]=''; });
+  });
+  ['temoinMT','mesureurChamp','thermometre','radiometreUV','radiometreLUX','autre'].forEach(function(r){
+    ['marque','type','dateEtalon','validite'].forEach(function(c){ o['a_acc_'+r+'_'+c]=''; });
+  });
+  ['Ctrl','Val'].forEach(function(r){
+    ['Intensite','Concentration','Champ'].forEach(function(c){ o['a_verif_'+r+'_'+c]=''; });
   });
   return o;
 }
@@ -556,10 +601,25 @@ function defaultVT(){
     a_eclairage:'', a_grossissement:'', a_photo:false, a_photoNb:'', a_video:false, a_videoDuree:'',
     b_zonesInspectees:'', b_indications:'' };
 }
-var DEFAULTS_BY_TYPE = { PT: defaultPT, MT: defaultMT, VT: defaultVT };
+function defaultUT(){
+  var o = { a_objet:'', a_etendue:'', a_etendueFreq:'', a_etatSurface:[], a_epaisseur:'',
+    a_appareilMarque:'', a_appareilModele:'', a_etalonBloc:'', a_etalonRef:'',
+    a_palpeurType:'', a_palpeurFreq:'', a_palpeurAngle:'', a_couplant:'',
+    a_gainRef:'', a_sensibilite:'', a_zoneMorte:'',
+    b_technique:'', b_indications:'' };
+  return o;
+}
+function defaultRT(){
+  var o = { a_objet:'', a_etendue:'', a_etendueFreq:'', a_etatSurface:[],
+    a_sourceType:'', a_sourceAppareil:'', a_energie:'', a_filmType:'', a_filmMarque:'',
+    a_distanceFF:'', a_technique:'', a_nbCliches:'',
+    b_densite:'', b_iqiType:'', b_iqiResolution:'', b_indications:'' };
+  return o;
+}
+var DEFAULTS_BY_TYPE = { PT: defaultPT, MT: defaultMT, VT: defaultVT, UT: defaultUT, RT: defaultRT };
 
 /* ===================== STATE ===================== */
-var state = { common: defaultCommon(), PT: defaultPT(), MT: defaultMT(), VT: defaultVT() };
+var state = { common: defaultCommon(), PT: defaultPT(), MT: defaultMT(), VT: defaultVT(), UT: defaultUT(), RT: defaultRT() };
 var currentType = 'PT';
 var currentReportId = null;
 var dirty = false;
@@ -571,6 +631,7 @@ var API_BASE = '/api';
 var allReports = [];
 var histFilterMode = 'all'; // 'all' | 'toSign'
 var allPersonnel = [];
+var orgSettings = { orgName:'Alstom Crespin S.A.S', orgAddress1:'1 Place des Ateliers', orgAddress2:'59154 CRESPIN, France', logoDataUrl:'' };
 var isAdmin = false;
 var currentUserNom = '';
 var authToken = null;
@@ -620,6 +681,8 @@ function apiSavePersonnel(person){ return apiRequest('/personnel', { method:'POS
 function apiDeletePersonnel(nom){ return apiRequest('/personnel?nom='+encodeURIComponent(nom), { method:'DELETE' }); }
 function apiGetReports(){ return apiRequest('/reports', { method:'GET' }); }
 function apiSaveReport(report){ return apiRequest('/reports', { method:'POST', body:report }); }
+function apiGetSettings(){ return apiRequest('/settings', { method:'GET' }); }
+function apiSaveSettings(settings){ return apiRequest('/settings', { method:'POST', body:settings }); }
 
 function persistSession(token, nom, admin){
   authToken = token; currentUserNom = nom; isAdmin = !!admin;
@@ -823,6 +886,46 @@ function productsTable(rows, colDefs, t){
   return wrap;
 }
 
+/* generic table builder : keyPrefix+'_'+row.key+'_'+col.key — réutilisé pour Accessoires / Vérifications / Pièces (MT) */
+function genericTable(rowHeaderLabel, keyPrefix, rows, colDefs, t){
+  var wrap = el('div',{class:'table-scroll'});
+  var table = el('table',{class:'mini'});
+  var thead = el('tr',{});
+  thead.appendChild(el('th',{},[document.createTextNode(rowHeaderLabel)]));
+  colDefs.forEach(function(c){ thead.appendChild(el('th',{},[document.createTextNode(c.label)])); });
+  table.appendChild(el('thead',{},[thead]));
+  var tbody = el('tbody',{});
+  rows.forEach(function(r){
+    var tr = el('tr',{});
+    tr.appendChild(el('td',{class:'rowlabel'},[document.createTextNode(r.label)]));
+    colDefs.forEach(function(c){
+      var key = keyPrefix+'_'+r.key+'_'+c.key;
+      var td = el('td',{});
+      var input = el('input',{type:'text','data-key':key,'data-scope':'type', placeholder:c.placeholder||''});
+      input.value = t[key]||'';
+      td.appendChild(input);
+      tr.appendChild(td);
+    });
+    tbody.appendChild(tr);
+  });
+  table.appendChild(tbody);
+  wrap.appendChild(table);
+  return wrap;
+}
+function genericPreviewTable(rowHeaderLabel, keyPrefix, rows, colDefs, t){
+  var h = '<table class="pv-table"><tr><th>'+esc(rowHeaderLabel)+'</th>' + colDefs.map(function(c){return '<th>'+esc(c.label)+'</th>';}).join('') + '</tr>';
+  rows.forEach(function(r){
+    h += '<tr><td>'+esc(r.label)+'</td>';
+    colDefs.forEach(function(c){
+      var key = keyPrefix+'_'+r.key+'_'+c.key;
+      h += '<td>'+val(t[key])+'</td>';
+    });
+    h += '</tr>';
+  });
+  h += '</table>';
+  return h;
+}
+
 var OBJET_OPTIONS = [{v:'rive',l:'Rive'},{v:'soudure',l:'Soudure'},{v:'surface',l:'Surface'}];
 var ETAT_OPTIONS = [{v:'cisaille',l:'Cisaillé'},{v:'meule',l:'Meulé'},{v:'brut',l:'Brut'},{v:'usine',l:'Usiné'}];
 
@@ -1020,32 +1123,97 @@ function buildFormPT(t){
 
 function buildFormMT(t){
   var frag = document.createDocumentFragment();
-  var a = el('div',{class:'section'});
-  a.appendChild(sectionTitle('A','Conditions opératoires'));
-  a.appendChild(fieldRadioSet('a_objet','1. Objet du contrôle', OBJET_OPTIONS, t.a_objet, {scope:'type', span2:true}));
-  a.appendChild(buildEtendueField(t));
-  a.appendChild(fieldCheckSet('a_etatSurface','3. État de surface', ETAT_OPTIONS, t.a_etatSurface, {scope:'type', span2:true}));
-  a.appendChild(grid([ fieldText('a_temperature','4. Température de la pièce (°C)', {scope:'type', value:t.a_temperature}) ]));
-  a.appendChild(fieldRadioSet('a_typeCourant','5. Type de courant', [{v:'alternatif',l:'Alternatif (AC)'},{v:'continu',l:'Continu (DC)'},{v:'redresse_mono',l:'Redressé mono-alternance'},{v:'redresse_tri',l:'Redressé tri-alternance'}], t.a_typeCourant, {scope:'type', span2:true}));
-  a.appendChild(fieldRadioSet('a_methodeAimant','6. Méthode d’aimantation', [{v:'electroaimant',l:'Électroaimant (joug)'},{v:'bobine',l:'Bobine'},{v:'touches',l:'Touches'},{v:'directe',l:'Aimantation directe'},{v:'champ_tournant',l:'Champ tournant'}], t.a_methodeAimant, {scope:'type', span2:true}));
-  a.appendChild(grid([
-    fieldText('a_intensite','7. Intensité / champ appliqué', {scope:'type', value:t.a_intensite, placeholder:'A ou mT'}),
+
+  var adm = el('div',{class:'section'});
+  adm.appendChild(sectionTitle('', 'Contrat / destinataire'));
+  adm.appendChild(grid([
+    fieldText('a_contrat','Contrat N°', {scope:'type', value:t.a_contrat}),
+    fieldText('a_destinataire','Destinataire', {scope:'type', value:t.a_destinataire, placeholder:'ex. SNCF'}),
+    fieldText('a_refCdeAT','Réf. Cde AT & libellé', {scope:'type', value:t.a_refCdeAT}),
+    fieldText('a_refCdeATDate','Date (Réf. Cde AT)', {scope:'type', type:'date', value:t.a_refCdeATDate}),
+    fieldText('a_marcheClient','N° Marché / Cde Client', {scope:'type', value:t.a_marcheClient}),
+    fieldText('a_marcheClientDate','Date (Marché / Cde Client)', {scope:'type', type:'date', value:t.a_marcheClientDate})
   ]));
-  a.appendChild(fieldRadioSet('a_verifIndicateur','8. Vérification indicateur de champ', [{v:'conforme',l:'Conforme'},{v:'non_conforme',l:'Non conforme'}], t.a_verifIndicateur, {scope:'type', span2:true}));
-  a.appendChild(grid([ fieldText('a_indicateurRef','Référence témoin / Shim utilisé', {scope:'type', value:t.a_indicateurRef, span2:true}) ]));
-  a.appendChild(el('div',{class:'section-title', style:'margin-top:10px;'},[document.createTextNode('9. Utilisation des produits')]));
-  a.appendChild(productsTable(
-    [{key:'produit',label:'Produit magnétique'},{key:'nettoyage',label:'Nettoyage final'}],
-    [{key:'ref',label:'Désignation / réf.'},{key:'lot',label:'Lot N°'},{key:'peremption',label:'Péremption',placeholder:'jj/mm/aaaa'},{key:'appli',label:'Application'},{key:'temps',label:'Temps'},{key:'sechage',label:'Séchage'}],
+  frag.appendChild(adm);
+
+  var proc = el('div',{class:'section'});
+  proc.appendChild(sectionTitle('', 'Procédures d’examen magnétoscopique'));
+  proc.appendChild(el('div',{class:'subtle-note'},[document.createTextNode('Le critère d’acceptation se renseigne dans la section Identification ci-dessus.')]));
+  proc.appendChild(grid([
+    fieldText('a_procGenerale','Générale (réf)', {scope:'type', value:t.a_procGenerale}),
+    fieldText('a_procParticuliere','Particulière (réf)', {scope:'type', value:t.a_procParticuliere})
+  ]));
+  frag.appendChild(proc);
+
+  var veh = el('div',{class:'section'});
+  veh.appendChild(sectionTitle('', 'Véhicule / Pièce'));
+  veh.appendChild(el('div',{class:'subtle-note'},[document.createTextNode('La pièce et la matière se renseignent dans la section Identification ci-dessus.')]));
+  veh.appendChild(grid([
+    fieldText('a_stadeFabrication','Stade de fabrication', {scope:'type', value:t.a_stadeFabrication, placeholder:'ex. FINAL', span2:true})
+  ]));
+  frag.appendChild(veh);
+
+  var app = el('div',{class:'section'});
+  app.appendChild(sectionTitle('', 'Appareillage d’aimantation'));
+  app.appendChild(fieldRadioSet('a_appareilPortatif','Type d’appareil', [{v:'portatif',l:'Portatif'},{v:'autre',l:'Autre'}], t.a_appareilPortatif, {scope:'type', span2:true}));
+  app.appendChild(grid([
+    fieldText('a_appareilAutrePrecision','Précision si « Autre »', {scope:'type', value:t.a_appareilAutrePrecision}),
+    fieldText('a_appareilType','Type', {scope:'type', value:t.a_appareilType}),
+    fieldText('a_appareilMarque','Marque', {scope:'type', value:t.a_appareilMarque}),
+    fieldText('a_appareilAnnee','Année', {scope:'type', value:t.a_appareilAnnee}),
+    fieldText('a_ecartementTouches','Écartement des touches de contact', {scope:'type', value:t.a_ecartementTouches, placeholder:'mm'})
+  ]));
+  app.appendChild(fieldRadioSet('a_modeAimantation','Mode d’aimantation', [{v:'champ',l:'Passage de champ'},{v:'courant',l:'Passage de courant'}], t.a_modeAimantation, {scope:'type', span2:true}));
+  app.appendChild(fieldRadioSet('a_typeCourant','Courant', [{v:'continu',l:'Continu'},{v:'redresse1',l:'Redressé 1 alt.'},{v:'redresse2',l:'Redressé 2 alt.'},{v:'alternatif',l:'Alternatif'}], t.a_typeCourant, {scope:'type', span2:true}));
+  app.appendChild(grid([
+    fieldText('a_entretienPar','Entretien et vérification par', {scope:'type', value:t.a_entretienPar}),
+    fieldText('a_entretienFreq','Fréquence', {scope:'type', value:t.a_entretienFreq}),
+    fieldText('a_entretienEnregistrement','Enregistrement', {scope:'type', value:t.a_entretienEnregistrement})
+  ]));
+  frag.appendChild(app);
+
+  var prod = el('div',{class:'section'});
+  prod.appendChild(sectionTitle('', 'Produits utilisés'));
+  prod.appendChild(productsTable(
+    [{key:'degraissant',label:'Dégraissant'},{key:'liqueur',label:'Liqueur magnétique'},{key:'contrastant',label:'Contrastant'}],
+    [{key:'marque',label:'Marque et type'},{key:'lot',label:'Réf. de lot'},{key:'peremption',label:'Péremption',placeholder:'jj/mm/aaaa'}],
     t));
-  a.appendChild(fieldRadioSet('a_demagnetisation','10. Démagnétisation', [{v:'oui',l:'Oui'},{v:'non',l:'Non'}], t.a_demagnetisation, {scope:'type', span2:true}));
-  a.appendChild(grid([ fieldText('a_valeurResiduelle','Valeur résiduelle mesurée', {scope:'type', value:t.a_valeurResiduelle, placeholder:'mT / Gauss', span2:true}) ]));
-  frag.appendChild(a);
+  frag.appendChild(prod);
+
+  var acc = el('div',{class:'section'});
+  acc.appendChild(sectionTitle('', 'Accessoires'));
+  acc.appendChild(fieldCheck('a_temoinC','Témoin C', {scope:'type', value:t.a_temoinC}));
+  acc.appendChild(genericTable('Accessoire', 'a_acc',
+    [{key:'temoinMT',label:'Témoin de magnétoscopie (type)'},{key:'mesureurChamp',label:'Mesureur de champ (type)'},{key:'thermometre',label:'Thermomètre'},{key:'radiometreUV',label:'Radiomètre UV (type)'},{key:'radiometreLUX',label:'Radiomètre LUX (type)'},{key:'autre',label:'Autre(s)'}],
+    [{key:'marque',label:'Marque'},{key:'type',label:'Type'},{key:'dateEtalon',label:'Date étalonnage'},{key:'validite',label:'Validité'}],
+    t));
+  frag.appendChild(acc);
+
+  var verif = el('div',{class:'section'});
+  verif.appendChild(sectionTitle('', 'Vérifications enregistrées'));
+  verif.appendChild(genericTable('Vérification par', 'a_verif',
+    [{key:'Ctrl',label:'Contrôleur'},{key:'Val',label:'Contrôleur Valideur'}],
+    [{key:'Intensite',label:'Intensité (lux)'},{key:'Concentration',label:'Concentration'},{key:'Champ',label:'Valeur de champ'}],
+    t));
+  frag.appendChild(verif);
+
   frag.appendChild(buildOperateur(state.common));
+
+  var pieces = el('div',{class:'section'});
+  pieces.appendChild(sectionTitle('', 'Désignation des pièces'));
+  pieces.appendChild(grid([
+    fieldText('a_pieceDesignation','Désignation des pièces', {scope:'type', value:t.a_pieceDesignation}),
+    fieldText('a_pieceRepere','Repère du lot / coulée / n° d’ordre', {scope:'type', value:t.a_pieceRepere}),
+    fieldText('a_nbExamine','Nombre de pièces à examiner', {scope:'type', value:t.a_nbExamine}),
+    fieldText('a_nbConformeSansRetouche','Conformes sans retouches', {scope:'type', value:t.a_nbConformeSansRetouche}),
+    fieldText('a_nbConformeApresRetouche','Conformes après retouche', {scope:'type', value:t.a_nbConformeApresRetouche})
+  ]));
+  frag.appendChild(pieces);
+
   var b = el('div',{class:'section'});
-  b.appendChild(sectionTitle('B','Examen'));
+  b.appendChild(sectionTitle('', 'Examen'));
   var eclairage = el('div',{class:'field span-2'});
-  eclairage.appendChild(el('label',{},[document.createTextNode('1. Éclairage')]));
+  eclairage.appendChild(el('label',{},[document.createTextNode('Éclairage')]));
   var er = el('div',{style:'display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-top:4px;'});
   er.appendChild(fieldCheck('b_eclairageNat','Naturel', {scope:'type', value:t.b_eclairageNat}));
   er.appendChild(fieldCheck('b_eclairageArt','Artificiel', {scope:'type', value:t.b_eclairageArt}));
@@ -1054,6 +1222,93 @@ function buildFormMT(t){
   er.appendChild(fieldText('b_intensiteUV','Intensité UV-A (µW/cm²)', {scope:'type', value:t.b_intensiteUV}));
   eclairage.appendChild(er);
   b.appendChild(eclairage);
+  b.appendChild(fieldTextarea('b_indications','Description des indications', {scope:'type', value:t.b_indications}));
+  frag.appendChild(b);
+
+  var com = el('div',{class:'section'});
+  com.appendChild(sectionTitle('', 'Commentaires'));
+  com.appendChild(fieldTextarea('a_commentaires','Commentaires', {scope:'type', value:t.a_commentaires}));
+  com.appendChild(grid([
+    fieldText('a_demagnetisationTexte','Démagnétisation', {scope:'type', value:t.a_demagnetisationTexte}),
+    fieldText('c_ncrNum','NCR / AVM N°', {scope:'common', value:state.common.c_ncrNum})
+  ]));
+  frag.appendChild(com);
+
+  frag.appendChild(buildPhotos(state.common));
+  frag.appendChild(buildControleur(state.common));
+  return frag;
+}
+
+function buildFormUT(t){
+  var frag = document.createDocumentFragment();
+  var a = el('div',{class:'section'});
+  a.appendChild(sectionTitle('A','Conditions opératoires'));
+  a.appendChild(fieldRadioSet('a_objet','1. Objet du contrôle', OBJET_OPTIONS, t.a_objet, {scope:'type', span2:true}));
+  a.appendChild(buildEtendueField(t));
+  a.appendChild(fieldCheckSet('a_etatSurface','3. État de surface', ETAT_OPTIONS, t.a_etatSurface, {scope:'type', span2:true}));
+  a.appendChild(grid([ fieldText('a_epaisseur','4. Épaisseur de la pièce (mm)', {scope:'type', value:t.a_epaisseur}) ]));
+  a.appendChild(el('div',{class:'section-title', style:'margin-top:10px;'},[document.createTextNode('5. Appareillage')]));
+  a.appendChild(grid([
+    fieldText('a_appareilMarque','Marque de l’appareil', {scope:'type', value:t.a_appareilMarque, placeholder:'ex. Epoch, Omniscan'}),
+    fieldText('a_appareilModele','Modèle', {scope:'type', value:t.a_appareilModele}),
+    fieldText('a_etalonBloc','Bloc de référence (étalonnage)', {scope:'type', value:t.a_etalonBloc, placeholder:'ex. V1, V2, échelle'}),
+    fieldText('a_etalonRef','Référence étalon', {scope:'type', value:t.a_etalonRef})
+  ]));
+  a.appendChild(el('div',{class:'section-title', style:'margin-top:10px;'},[document.createTextNode('6. Palpeur')]));
+  a.appendChild(grid([
+    fieldText('a_palpeurType','Type (droit / angulaire)', {scope:'type', value:t.a_palpeurType}),
+    fieldText('a_palpeurFreq','Fréquence (MHz)', {scope:'type', value:t.a_palpeurFreq}),
+    fieldText('a_palpeurAngle','Angle (°)', {scope:'type', value:t.a_palpeurAngle}),
+    fieldText('a_couplant','Couplant utilisé', {scope:'type', value:t.a_couplant})
+  ]));
+  a.appendChild(el('div',{class:'section-title', style:'margin-top:10px;'},[document.createTextNode('7. Réglages')]));
+  a.appendChild(grid([
+    fieldText('a_gainRef','Gain de référence (dB)', {scope:'type', value:t.a_gainRef}),
+    fieldText('a_sensibilite','Sensibilité de balayage (dB)', {scope:'type', value:t.a_sensibilite}),
+    fieldText('a_zoneMorte','Zone morte', {scope:'type', value:t.a_zoneMorte})
+  ]));
+  frag.appendChild(a);
+  frag.appendChild(buildOperateur(state.common));
+  var b = el('div',{class:'section'});
+  b.appendChild(sectionTitle('B','Examen'));
+  b.appendChild(fieldText('b_technique','1. Technique employée', {scope:'type', value:t.b_technique, span2:true, placeholder:'ex. contact direct, immersion, paroi simple'}));
+  b.appendChild(fieldTextarea('b_indications','Description des indications', {scope:'type', value:t.b_indications}));
+  frag.appendChild(b);
+  frag.appendChild(buildPhotos(state.common));
+  frag.appendChild(buildControleur(state.common));
+  return frag;
+}
+
+function buildFormRT(t){
+  var frag = document.createDocumentFragment();
+  var a = el('div',{class:'section'});
+  a.appendChild(sectionTitle('A','Conditions opératoires'));
+  a.appendChild(fieldRadioSet('a_objet','1. Objet du contrôle', OBJET_OPTIONS, t.a_objet, {scope:'type', span2:true}));
+  a.appendChild(buildEtendueField(t));
+  a.appendChild(fieldCheckSet('a_etatSurface','3. État de surface', ETAT_OPTIONS, t.a_etatSurface, {scope:'type', span2:true}));
+  a.appendChild(el('div',{class:'section-title', style:'margin-top:10px;'},[document.createTextNode('4. Source')]));
+  a.appendChild(fieldRadioSet('a_sourceType','Type de source', [{v:'rx',l:'Rayons X'},{v:'gamma',l:'Gamma'}], t.a_sourceType, {scope:'type', span2:true}));
+  a.appendChild(grid([
+    fieldText('a_sourceAppareil','Appareil (type / n°)', {scope:'type', value:t.a_sourceAppareil}),
+    fieldText('a_energie','Énergie / activité', {scope:'type', value:t.a_energie, placeholder:'kV ou Ci'})
+  ]));
+  a.appendChild(el('div',{class:'section-title', style:'margin-top:10px;'},[document.createTextNode('5. Film / technique')]));
+  a.appendChild(grid([
+    fieldText('a_filmType','Type de film', {scope:'type', value:t.a_filmType}),
+    fieldText('a_filmMarque','Marque', {scope:'type', value:t.a_filmMarque}),
+    fieldText('a_distanceFF','Distance source-film (DFF)', {scope:'type', value:t.a_distanceFF, placeholder:'mm'}),
+    fieldText('a_technique','Technique', {scope:'type', value:t.a_technique, placeholder:'ex. paroi simple, paroi double'}),
+    fieldText('a_nbCliches','Nombre de clichés', {scope:'type', value:t.a_nbCliches})
+  ]));
+  frag.appendChild(a);
+  frag.appendChild(buildOperateur(state.common));
+  var b = el('div',{class:'section'});
+  b.appendChild(sectionTitle('B','Examen'));
+  b.appendChild(grid([
+    fieldText('b_densite','1. Densité du film mesurée', {scope:'type', value:t.b_densite}),
+    fieldText('b_iqiType','Indicateur de qualité d’image (type)', {scope:'type', value:t.b_iqiType}),
+    fieldText('b_iqiResolution','Résolution IQI obtenue', {scope:'type', value:t.b_iqiResolution})
+  ]));
   b.appendChild(fieldTextarea('b_indications','Description des indications', {scope:'type', value:t.b_indications}));
   frag.appendChild(b);
   frag.appendChild(buildPhotos(state.common));
@@ -1098,7 +1353,7 @@ function buildFormVT(t){
   frag.appendChild(buildControleur(state.common));
   return frag;
 }
-var FORM_BUILDERS = { PT: buildFormPT, MT: buildFormMT, VT: buildFormVT };
+var FORM_BUILDERS = { PT: buildFormPT, MT: buildFormMT, VT: buildFormVT, UT: buildFormUT, RT: buildFormRT };
 
 /* ===================== RENDER: FORM ===================== */
 var formPanel = document.getElementById('formPanel');
@@ -1150,7 +1405,7 @@ function saveDraft(){
     localStorage.setItem('pvcnd_draft_v1', JSON.stringify({
       type: currentType,
       common: state.common,
-      byType: { PT: state.PT, MT: state.MT, VT: state.VT },
+      byType: { PT: state.PT, MT: state.MT, VT: state.VT, UT: state.UT, RT: state.RT },
       currentReportId: currentReportId
     }));
   }catch(e){ /* stockage indisponible : tant pis, pas bloquant */ }
@@ -1165,7 +1420,7 @@ function loadDraft(){
     var d = JSON.parse(raw);
     if(!d || !d.common) return false;
     state.common = Object.assign(defaultCommon(), d.common);
-    ['PT','MT','VT'].forEach(function(k){ state[k] = Object.assign(DEFAULTS_BY_TYPE[k](), (d.byType&&d.byType[k])||{}); });
+    TYPE_ORDER.forEach(function(k){ state[k] = Object.assign(DEFAULTS_BY_TYPE[k](), (d.byType&&d.byType[k])||{}); });
     currentType = (d.type && METHODS[d.type]) ? d.type : 'PT';
     currentReportId = d.currentReportId || null;
     return true;
@@ -1218,7 +1473,23 @@ function resultBadgeHTML(v){
   return '<span class="pv-chip off">Non renseigné</span>';
 }
 
+function logoImgSrc(){ return orgSettings.logoDataUrl || '/alstom-logo.png'; }
+function photosAnnexHTML(c){
+  if(!(c.photos && c.photos.length)) return '';
+  var h = '<div class="pv-annex"><div class="pv-annex-title">Annexe photos — PV N° '+val(c.h_numero,false)+'</div><div class="pv-annex-grid">';
+  c.photos.forEach(function(p, i){
+    h += '<figure class="pv-annex-fig"><img src="'+p.src+'" alt="Photo '+(i+1)+'"><figcaption>Photo '+(i+1)+(p.cap?(' — '+esc(p.cap)):'')+'</figcaption></figure>';
+  });
+  h += '</div></div>';
+  return h;
+}
+
 function renderPreview(){
+  if(currentType==='MT'){ renderPreviewMT(); return; }
+  renderPreviewGeneric();
+}
+
+function renderPreviewGeneric(){
   var c = state.common, t = state[currentType], m = METHODS[currentType];
   var docRef = c.h_docRef || m.defaultDocRef;
   var docDate = c.h_docDate || m.defaultDocDate;
@@ -1228,7 +1499,7 @@ function renderPreview(){
   html += '<div class="pv-numbox"><span class="lbl">N°</span><span class="val">'+val(c.h_numero)+'</span></div>';
   html += '<div class="pv-cmd"><span class="lbl">Commande / order N°</span><br><span class="val">'+val(c.h_commande)+'</span></div>';
   html += '<div class="pv-title"><span class="fr">'+esc(m.titleFr)+'</span><span class="en">'+esc(m.titleEn)+'</span></div>';
-  html += '<div class="pv-brand"><img src="/alstom-logo.png" alt="ALSTOM"></div>';
+  html += '<div class="pv-brand"><img src="'+esc(logoImgSrc())+'" alt="logo"></div>';
   html += '</div>';
 
   html += '<div class="pv-id2">';
@@ -1257,19 +1528,29 @@ function renderPreview(){
     html += '<div class="pv-line"><span class="k">5. Produits utilisés</span></div>';
     html += previewTable([{key:'degraissage',label:'Dégraissage'},{key:'penetrant',label:'Pénétrant'},{key:'elimination',label:'Élimination pénétrant'},{key:'revelateur',label:'Révélateur'},{key:'nettoyage',label:'Nettoyage final'}],
       [{key:'ref',label:'Réf.'},{key:'lot',label:'Lot N°'},{key:'peremption',label:'Péremption'},{key:'appli',label:'Application'},{key:'temps',label:'Temps'},{key:'sechage',label:'Séchage'}], t);
-  } else if(currentType==='MT'){
+  } else if(currentType==='UT'){
     html += '<div class="pv-line"><span class="k">1. Objet du contrôle</span></div>'+previewOptionsRow(OBJET_OPTIONS, t.a_objet);
     html += '<div class="pv-line"><span class="k">2. Étendue</span></div>'+previewOptionsRow([{v:'100',l:'100 %'},{v:'sondage',l:'Sondage'}], t.a_etendue)+(t.a_etendue==='sondage'&&t.a_etendueFreq?('<div class="pv-line"><span class="k">Fréquence</span><span class="v">'+val(t.a_etendueFreq)+'</span></div>'):'');
     html += '<div class="pv-line"><span class="k">3. État de surface</span></div>'+previewOptionsRowMulti(ETAT_OPTIONS, t.a_etatSurface);
-    html += '<div class="pv-line"><span class="k">4. Température</span><span class="v">'+val(t.a_temperature? t.a_temperature+' °C':'')+'</span></div>';
-    html += '<div class="pv-line"><span class="k">5. Type de courant</span></div>'+previewOptionsRow([{v:'alternatif',l:'Alternatif'},{v:'continu',l:'Continu'},{v:'redresse_mono',l:'Redr. mono'},{v:'redresse_tri',l:'Redr. tri'}], t.a_typeCourant);
-    html += '<div class="pv-line"><span class="k">6. Méthode d’aimantation</span></div>'+previewOptionsRow([{v:'electroaimant',l:'Électroaimant'},{v:'bobine',l:'Bobine'},{v:'touches',l:'Touches'},{v:'directe',l:'Directe'},{v:'champ_tournant',l:'Champ tournant'}], t.a_methodeAimant);
-    html += '<div class="pv-line"><span class="k">7. Intensité / champ appliqué</span><span class="v">'+val(t.a_intensite)+'</span></div>';
-    html += '<div class="pv-line"><span class="k">8. Indicateur de champ</span><span class="v">'+(t.a_verifIndicateur?radioLabel([{v:'conforme',l:'Conforme'},{v:'non_conforme',l:'Non conforme'}],t.a_verifIndicateur):'—')+(t.a_indicateurRef?(' — '+val(t.a_indicateurRef,false)):'')+'</span></div>';
-    html += '<div class="pv-line"><span class="k">9. Produits utilisés</span></div>';
-    html += previewTable([{key:'produit',label:'Produit magnétique'},{key:'nettoyage',label:'Nettoyage final'}],
-      [{key:'ref',label:'Réf.'},{key:'lot',label:'Lot N°'},{key:'peremption',label:'Péremption'},{key:'appli',label:'Application'},{key:'temps',label:'Temps'},{key:'sechage',label:'Séchage'}], t);
-    html += '<div class="pv-line"><span class="k">10. Démagnétisation</span><span class="v">'+(t.a_demagnetisation==='oui'?'Oui':(t.a_demagnetisation==='non'?'Non':'—'))+(t.a_valeurResiduelle?(' — résiduel '+val(t.a_valeurResiduelle,false)):'')+'</span></div>';
+    html += '<div class="pv-line"><span class="k">4. Épaisseur de la pièce</span><span class="v">'+val(t.a_epaisseur? t.a_epaisseur+' mm':'')+'</span></div>';
+    html += '<div class="pv-line"><span class="k">5. Appareil</span><span class="v">'+val([t.a_appareilMarque,t.a_appareilModele].filter(Boolean).join(' — '))+'</span></div>';
+    html += '<div class="pv-line"><span class="k">Bloc de référence</span><span class="v">'+val([t.a_etalonBloc,t.a_etalonRef].filter(Boolean).join(' — '))+'</span></div>';
+    html += '<div class="pv-line"><span class="k">6. Palpeur</span><span class="v">'+val([t.a_palpeurType,t.a_palpeurFreq&&(t.a_palpeurFreq+' MHz'),t.a_palpeurAngle&&(t.a_palpeurAngle+'°')].filter(Boolean).join(' — '))+'</span></div>';
+    html += '<div class="pv-line"><span class="k">Couplant</span><span class="v">'+val(t.a_couplant)+'</span></div>';
+    html += '<div class="pv-line"><span class="k">7. Gain de référence</span><span class="v">'+val(t.a_gainRef? t.a_gainRef+' dB':'')+'</span></div>';
+    html += '<div class="pv-line"><span class="k">Sensibilité de balayage</span><span class="v">'+val(t.a_sensibilite? t.a_sensibilite+' dB':'')+'</span></div>';
+    html += '<div class="pv-line"><span class="k">Zone morte</span><span class="v">'+val(t.a_zoneMorte)+'</span></div>';
+  } else if(currentType==='RT'){
+    html += '<div class="pv-line"><span class="k">1. Objet du contrôle</span></div>'+previewOptionsRow(OBJET_OPTIONS, t.a_objet);
+    html += '<div class="pv-line"><span class="k">2. Étendue</span></div>'+previewOptionsRow([{v:'100',l:'100 %'},{v:'sondage',l:'Sondage'}], t.a_etendue)+(t.a_etendue==='sondage'&&t.a_etendueFreq?('<div class="pv-line"><span class="k">Fréquence</span><span class="v">'+val(t.a_etendueFreq)+'</span></div>'):'');
+    html += '<div class="pv-line"><span class="k">3. État de surface</span></div>'+previewOptionsRowMulti(ETAT_OPTIONS, t.a_etatSurface);
+    html += '<div class="pv-line"><span class="k">4. Source</span></div>'+previewOptionsRow([{v:'rx',l:'Rayons X'},{v:'gamma',l:'Gamma'}], t.a_sourceType);
+    html += '<div class="pv-line"><span class="k">Appareil</span><span class="v">'+val(t.a_sourceAppareil)+'</span></div>';
+    html += '<div class="pv-line"><span class="k">Énergie / activité</span><span class="v">'+val(t.a_energie)+'</span></div>';
+    html += '<div class="pv-line"><span class="k">5. Film</span><span class="v">'+val([t.a_filmType,t.a_filmMarque].filter(Boolean).join(' — '))+'</span></div>';
+    html += '<div class="pv-line"><span class="k">Distance source-film</span><span class="v">'+val(t.a_distanceFF)+'</span></div>';
+    html += '<div class="pv-line"><span class="k">Technique</span><span class="v">'+val(t.a_technique)+'</span></div>';
+    html += '<div class="pv-line"><span class="k">Nombre de clichés</span><span class="v">'+val(t.a_nbCliches)+'</span></div>';
   } else {
     html += '<div class="pv-line"><span class="k">1. Zone / organe examiné</span><span class="v">'+val(t.a_zone)+'</span></div>';
     html += '<div class="pv-line"><span class="k">2. Étendue</span></div>'+previewOptionsRow([{v:'100',l:'100 %'},{v:'sondage',l:'Sondage'}], t.a_etendue)+(t.a_etendue==='sondage'&&t.a_etendueFreq?('<div class="pv-line"><span class="k">Fréquence</span><span class="v">'+val(t.a_etendueFreq)+'</span></div>'):'');
@@ -1293,8 +1574,11 @@ function renderPreview(){
   if(currentType==='PT'){
     html += '<div class="pv-line"><span class="k">1. Durée de maintien du révélateur</span><span class="v">'+val(t.b_duree)+'</span></div>';
     html += '<div class="pv-line"><span class="k">2. Éclairage</span></div><div class="pv-options">'+chip(t.b_eclairageNat,'Naturel')+chip(t.b_eclairageArt,'Artificiel')+(t.b_eclairageValeur?chip(true,t.b_eclairageValeur+' lux'):'')+chip(t.b_lampeUV,'Lampe UV')+'</div>';
-  } else if(currentType==='MT'){
-    html += '<div class="pv-line"><span class="k">1. Éclairage</span></div><div class="pv-options">'+chip(t.b_eclairageNat,'Naturel')+chip(t.b_eclairageArt,'Artificiel')+(t.b_eclairageValeur?chip(true,t.b_eclairageValeur+' lux'):'')+chip(t.b_lampeUVA,'Lampe UV-A')+(t.b_intensiteUV?chip(true,t.b_intensiteUV+' µW/cm²'):'')+'</div>';
+  } else if(currentType==='UT'){
+    html += '<div class="pv-line"><span class="k">1. Technique employée</span><span class="v">'+val(t.b_technique)+'</span></div>';
+  } else if(currentType==='RT'){
+    html += '<div class="pv-line"><span class="k">1. Densité du film mesurée</span><span class="v">'+val(t.b_densite)+'</span></div>';
+    html += '<div class="pv-line"><span class="k">Indicateur de qualité d’image</span><span class="v">'+val([t.b_iqiType,t.b_iqiResolution].filter(Boolean).join(' — '))+'</span></div>';
   } else {
     html += '<div class="pv-line"><span class="k">1. Zones effectivement inspectées</span></div><div class="pv-desc">'+val(t.b_zonesInspectees,false)+'</div>';
   }
@@ -1306,15 +1590,110 @@ function renderPreview(){
   html += '</div></div>';
   html += '<div class="pv-block"><div class="f"><span class="k">Valideur</span><span class="v">'+val(c.ctrl_nom)+'</span></div><div class="f"><span class="k">Niveau</span><span class="v">'+val(c.ctrl_niveau)+'</span></div><div class="f"><span class="k">Certification</span><span class="v">'+val(c.ctrl_certif)+'</span></div><div class="f"><span class="k">Date</span><span class="v">'+fmtDateFR(c.ctrl_date)+'</span></div><div class="f"><span class="k">Signature</span><div class="pv-sigbox"></div></div></div>';
 
-  html += '<div class="pv-footer"><span>Généré via Rapports CND</span><span>Page 1/1</span></div>';
+  html += '<div class="pv-footer"><span>Généré via Rapports CND</span><span>Page 1/'+(c.photos&&c.photos.length?'2':'1')+'</span></div>';
 
-  if(c.photos && c.photos.length){
-    html += '<div class="pv-annex"><div class="pv-annex-title">Annexe photos — PV N° '+val(c.h_numero,false)+'</div><div class="pv-annex-grid">';
-    c.photos.forEach(function(p, i){
-      html += '<figure class="pv-annex-fig"><img src="'+p.src+'" alt="Photo '+(i+1)+'"><figcaption>Photo '+(i+1)+(p.cap?(' — '+esc(p.cap)):'')+'</figcaption></figure>';
-    });
-    html += '</div></div>';
+  html += photosAnnexHTML(c);
+
+  document.getElementById('previewPaper').innerHTML = html;
+}
+
+/* ===================== PREVIEW MT — reproduit le certificat officiel Alstom ===================== */
+function renderPreviewMT(){
+  var c = state.common, t = state.MT, m = METHODS.MT;
+  var docRef = c.h_docRef || m.defaultDocRef;
+  var docDate = c.h_docDate || m.defaultDocDate;
+  var html = '';
+  html += '<div class="pv-topline"><span>'+(docRef?('Référence du document : '+esc(docRef)):'')+'</span><span>'+(docDate?esc(docDate):'')+'</span></div>';
+
+  html += '<div class="pv-head">';
+  html += '<div class="pv-numbox"><span class="lbl">N°</span><span class="val">'+val(c.h_numero)+'</span></div>';
+  html += '<div class="pv-cmd"><span class="lbl">Contrat N°</span><br><span class="val">'+val(t.a_contrat)+'</span><br><span class="lbl" style="margin-top:4px;display:inline-block;">Date</span><br><span class="val">'+fmtDateFR(c.h_date)+'</span></div>';
+  html += '<div class="pv-title"><span class="fr">'+esc(m.titleFr)+' n°'+val(c.h_numero,false)+'</span></div>';
+  html += '<div class="pv-brand"><img src="'+esc(logoImgSrc())+'" alt="logo"></div>';
+  html += '</div>';
+
+  html += '<div class="pv-id2">';
+  html += '<div class="pv-id2-col">';
+  html += '<div class="pv-id2-line"><span class="k">Société</span><span class="v" style="font-weight:600;">'+val(orgSettings.orgName)+'<br>'+esc(orgSettings.orgAddress1||'')+'<br>'+esc(orgSettings.orgAddress2||'')+'</span></div>';
+  html += '<div class="pv-id2-line"><span class="k">Réf. Cde AT &amp; libellé</span><span class="v">'+val(t.a_refCdeAT)+'</span></div>';
+  html += '<div class="pv-id2-line"><span class="k">Date</span><span class="v">'+fmtDateFR(t.a_refCdeATDate)+'</span></div>';
+  html += '</div>';
+  html += '<div class="pv-id2-col right">';
+  html += '<div class="pv-id2-line"><span class="k">Destinataire</span><span class="v">'+val(t.a_destinataire)+'</span></div>';
+  html += '<div class="pv-id2-line"><span class="k">N° Marché / Cde Client</span><span class="v">'+val(t.a_marcheClient)+'</span></div>';
+  html += '<div class="pv-id2-line"><span class="k">Date</span><span class="v">'+fmtDateFR(t.a_marcheClientDate)+'</span></div>';
+  html += '</div>';
+  html += '</div>';
+
+  html += '<div class="pv-section"><div class="pv-section-title">Procédures d’examen magnétoscopique</div><div class="pv-section-body">';
+  html += '<div class="pv-line"><span class="k">Générale (réf)</span><span class="v">'+val(t.a_procGenerale)+'</span></div>';
+  html += '<div class="pv-line"><span class="k">Particulière (réf)</span><span class="v">'+val(t.a_procParticuliere)+'</span></div>';
+  html += '<div class="pv-line"><span class="k">Critère(s) d’acceptation(s)</span><span class="v">'+val(c.h_critere)+'</span></div>';
+  html += '</div></div>';
+
+  html += '<div class="pv-section"><div class="pv-section-title">Véhicule / Pièce</div><div class="pv-section-body">';
+  html += '<div class="pv-line"><span class="k">Pièce</span><span class="v">'+val(c.h_piece)+'</span></div>';
+  html += '<div class="pv-line"><span class="k">Stade de fabrication</span><span class="v">'+val(t.a_stadeFabrication)+'</span></div>';
+  html += '<div class="pv-line"><span class="k">Matière / état métallurgique</span><span class="v">'+val(c.h_matiere)+'</span></div>';
+  html += '</div></div>';
+
+  html += '<div class="pv-section"><div class="pv-section-title">Appareillage d’aimantation</div><div class="pv-section-body">';
+  html += '<div class="pv-line"><span class="k">Type</span></div>'+previewOptionsRow([{v:'portatif',l:'Portatif'},{v:'autre',l:'Autre'}], t.a_appareilPortatif)+(t.a_appareilPortatif==='autre'&&t.a_appareilAutrePrecision?('<div class="pv-line"><span class="k">Précision</span><span class="v">'+val(t.a_appareilAutrePrecision)+'</span></div>'):'');
+  html += '<div class="pv-line"><span class="k">Type / Marque / Année</span><span class="v">'+val([t.a_appareilType,t.a_appareilMarque,t.a_appareilAnnee].filter(Boolean).join(' — '))+'</span></div>';
+  html += '<div class="pv-line"><span class="k">Écartement des touches de contact</span><span class="v">'+val(t.a_ecartementTouches? t.a_ecartementTouches+' mm':'')+'</span></div>';
+  html += '<div class="pv-line"><span class="k">Mode d’aimantation</span></div>'+previewOptionsRow([{v:'champ',l:'Passage de champ'},{v:'courant',l:'Passage de courant'}], t.a_modeAimantation);
+  html += '<div class="pv-line"><span class="k">Courant</span></div>'+previewOptionsRow([{v:'continu',l:'Continu'},{v:'redresse1',l:'Redressé 1 alt.'},{v:'redresse2',l:'Redressé 2 alt.'},{v:'alternatif',l:'Alternatif'}], t.a_typeCourant);
+  if(t.a_entretienPar||t.a_entretienFreq||t.a_entretienEnregistrement){
+    html += '<div class="pv-line"><span class="k">Entretien et vérification</span><span class="v">'+val([t.a_entretienPar,t.a_entretienFreq,t.a_entretienEnregistrement].filter(Boolean).join(' — '))+'</span></div>';
   }
+  html += '</div></div>';
+
+  html += '<div class="pv-section"><div class="pv-section-title">Produits utilisés</div><div class="pv-section-body">';
+  html += previewTable([{key:'degraissant',label:'Dégraissant'},{key:'liqueur',label:'Liqueur magnétique'},{key:'contrastant',label:'Contrastant'}],
+    [{key:'marque',label:'Marque et type'},{key:'lot',label:'Réf. de lot'},{key:'peremption',label:'Péremption'}], t);
+  html += '</div></div>';
+
+  html += '<div class="pv-section"><div class="pv-section-title">Accessoires</div><div class="pv-section-body">';
+  html += '<div class="pv-line"><span class="k">Témoin C</span><span class="v">'+(t.a_temoinC?'✓':'—')+'</span></div>';
+  html += genericPreviewTable('Accessoire', 'a_acc',
+    [{key:'temoinMT',label:'Témoin de magnétoscopie (type)'},{key:'mesureurChamp',label:'Mesureur de champ (type)'},{key:'thermometre',label:'Thermomètre'},{key:'radiometreUV',label:'Radiomètre UV (type)'},{key:'radiometreLUX',label:'Radiomètre LUX (type)'},{key:'autre',label:'Autre(s)'}],
+    [{key:'marque',label:'Marque'},{key:'type',label:'Type'},{key:'dateEtalon',label:'Date étalonnage'},{key:'validite',label:'Validité'}], t);
+  html += '</div></div>';
+
+  html += '<div class="pv-section"><div class="pv-section-title">Vérifications enregistrées</div><div class="pv-section-body">';
+  html += genericPreviewTable('Vérification par', 'a_verif',
+    [{key:'Ctrl',label:'Contrôleur'},{key:'Val',label:'Contrôleur Valideur'}],
+    [{key:'Intensite',label:'Intensité (lux)'},{key:'Concentration',label:'Concentration'},{key:'Champ',label:'Valeur de champ'}], t);
+  html += '</div></div>';
+
+  html += '<div class="pv-block"><div class="f"><span class="k">Nom du Contrôleur</span><span class="v">'+val(c.op_nom)+'</span></div><div class="f"><span class="k">Certification</span><span class="v">'+val(c.op_certif)+'</span></div><div class="f"><span class="k">Signature &amp; Poinçon</span><div class="pv-sigbox"></div></div></div>';
+
+  html += '<div class="pv-section"><div class="pv-section-title">Désignation des pièces</div><div class="pv-section-body">';
+  html += '<table class="pv-table"><tr><th>Désignation des pièces</th><th>Repère du lot / coulée / n° d’ordre</th><th>Nombre à examiner</th><th>Conformes sans retouches</th><th>Conformes après retouche</th></tr>';
+  html += '<tr><td>'+val(t.a_pieceDesignation)+'</td><td>'+val(t.a_pieceRepere)+'</td><td>'+val(t.a_nbExamine)+'</td><td>'+val(t.a_nbConformeSansRetouche)+'</td><td>'+val(t.a_nbConformeApresRetouche)+'</td></tr>';
+  html += '</table>';
+  html += '</div></div>';
+
+  html += '<div class="pv-section"><div class="pv-section-title">Examen</div><div class="pv-section-body">';
+  html += '<div class="pv-line"><span class="k">Éclairage</span></div><div class="pv-options">'+chip(t.b_eclairageNat,'Naturel')+chip(t.b_eclairageArt,'Artificiel')+(t.b_eclairageValeur?chip(true,t.b_eclairageValeur+' lux'):'')+chip(t.b_lampeUVA,'Lampe UV-A')+(t.b_intensiteUV?chip(true,t.b_intensiteUV+' µW/cm²'):'')+'</div>';
+  html += '<div class="pv-line" style="margin-top:6px;"><span class="k">Description des indications</span></div><div class="pv-desc">'+val(t.b_indications,false)+'</div>';
+  html += '</div></div>';
+
+  html += '<div class="pv-section"><div class="pv-section-title">Commentaires</div><div class="pv-section-body">';
+  html += '<div class="pv-desc">'+val(t.a_commentaires,false)+'</div>';
+  html += '<div class="pv-line" style="margin-top:6px;"><span class="k">Démagnétisation</span><span class="v">'+val(t.a_demagnetisationTexte)+'</span></div>';
+  html += '<div class="pv-line"><span class="k">NCR / AVM N°</span><span class="v">'+val(c.c_ncrNum)+'</span></div>';
+  html += '</div></div>';
+
+  html += '<div class="pv-section"><div class="pv-section-title">Résultat</div><div class="pv-section-body">';
+  html += '<div class="pv-result">'+chip(c.c_acceptable==='oui','Conforme suivant spécifications')+chip(c.c_acceptable==='oui_reparation','Conforme après retouches')+chip(c.c_acceptable==='non','Non conforme')+'</div>';
+  html += '</div></div>';
+
+  html += '<div class="pv-block"><div class="f"><span class="k">Nom du Contrôleur Valideur</span><span class="v">'+val(c.ctrl_nom)+'</span></div><div class="f"><span class="k">Certification</span><span class="v">'+val(c.ctrl_certif)+'</span></div><div class="f"><span class="k">Signature &amp; Tampon</span><div class="pv-sigbox"></div></div></div>';
+
+  html += '<div class="pv-footer"><span>Formulaire '+esc(m.formRef||'')+' · Index '+esc(m.indexClassement||'')+'</span><span>Domaine d’application : '+val(c.h_domaine,false)+' — Page 1/'+(c.photos&&c.photos.length?'2':'1')+'</span></div>';
+
+  html += photosAnnexHTML(c);
 
   document.getElementById('previewPaper').innerHTML = html;
 }
@@ -1733,12 +2112,14 @@ document.getElementById('btnToSign').addEventListener('click', async function(){
 var historyView = document.getElementById('historyView');
 var formView = document.getElementById('formView');
 var personnelView = document.getElementById('personnelView');
+var settingsView = document.getElementById('settingsView');
 var dashboardView = document.getElementById('dashboardView');
 function showView(v){
   dashboardView.style.display = (v==='dashboard') ? 'block' : 'none';
   formView.style.display = (v==='form') ? 'block' : 'none';
   historyView.style.display = (v==='history') ? 'block' : 'none';
   personnelView.style.display = (v==='personnel') ? 'block' : 'none';
+  settingsView.style.display = (v==='settings') ? 'block' : 'none';
   if(tabsEl) tabsEl.style.display = (v==='form') ? '' : 'none';
   var primaryActionsEl = document.getElementById('primaryActions');
   if(primaryActionsEl) primaryActionsEl.style.display = (v==='form') ? '' : 'none';
@@ -1798,6 +2179,7 @@ async function migrateLegacyReports(legacy){
 /* ===================== PERSONNEL (comptes gérés par l'administrateur, partagés via le serveur) ===================== */
 function updatePersonnelVisibility(){
   document.getElementById('btnPersonnel').style.display = isAdmin ? 'inline-flex' : 'none';
+  document.getElementById('btnSettings').style.display = isAdmin ? 'inline-flex' : 'none';
 }
 function updateAdminInfo(){
   var elInfo = document.getElementById('adminInfo');
@@ -1908,6 +2290,58 @@ function refreshPersonnelDatalist(){
   // directement par fieldPersonPicker() à chaque renderForm(), pas besoin de les rafraîchir ici.
 }
 
+/* ===================== PARAMÈTRES (en-tête des PV : société / logo — admin uniquement) ===================== */
+document.getElementById('btnSettings').addEventListener('click', async function(){
+  showView('settings');
+  fillSettingsForm();
+  try{ orgSettings = await apiGetSettings(); fillSettingsForm(); }catch(err){ /* on garde les valeurs déjà en mémoire */ }
+});
+document.getElementById('btnCloseSettings').addEventListener('click', function(){ showView('dashboard'); renderDashboard(); });
+function fillSettingsForm(){
+  document.getElementById('setOrgName').value = orgSettings.orgName || '';
+  document.getElementById('setOrgAddress1').value = orgSettings.orgAddress1 || '';
+  document.getElementById('setOrgAddress2').value = orgSettings.orgAddress2 || '';
+  var preview = document.getElementById('setLogoPreview');
+  var src = orgSettings.logoDataUrl || '/alstom-logo.png';
+  preview.src = src;
+  preview.style.display = 'inline-block';
+}
+var pendingLogoDataUrl = null;
+document.getElementById('setLogoInput').addEventListener('change', async function(e){
+  var file = e.target.files && e.target.files[0];
+  if(!file) return;
+  var dataUrl = await compressImage(file, 320, 0.9);
+  if(dataUrl){
+    pendingLogoDataUrl = dataUrl;
+    var preview = document.getElementById('setLogoPreview');
+    preview.src = dataUrl;
+    preview.style.display = 'inline-block';
+  }
+  e.target.value = '';
+});
+document.getElementById('btnSaveSettings').addEventListener('click', async function(){
+  var btn = document.getElementById('btnSaveSettings');
+  var status = document.getElementById('settingsStatus');
+  var next = {
+    orgName: document.getElementById('setOrgName').value.trim(),
+    orgAddress1: document.getElementById('setOrgAddress1').value.trim(),
+    orgAddress2: document.getElementById('setOrgAddress2').value.trim(),
+    logoDataUrl: (pendingLogoDataUrl!==null) ? pendingLogoDataUrl : (orgSettings.logoDataUrl||'')
+  };
+  btn.disabled = true;
+  status.textContent = 'Enregistrement…';
+  try{
+    orgSettings = await apiSaveSettings(next);
+    pendingLogoDataUrl = null;
+    status.textContent = 'Paramètres enregistrés ✓';
+    renderPreview();
+  }catch(err){
+    status.textContent = 'Impossible d’enregistrer : '+(err&&err.message||'erreur inconnue');
+  }finally{
+    btn.disabled = false;
+  }
+});
+
 function resultChipHTML(v){
   if(v==='oui') return '<span class="result-chip good">Acceptable</span>';
   if(v==='non') return '<span class="result-chip bad">Refusé</span>';
@@ -1965,13 +2399,13 @@ function renderDashboard(){
 
   var breakdown = document.getElementById('methodBreakdown');
   breakdown.innerHTML = '';
-  var counts = { PT:0, MT:0, VT:0 };
+  var counts = {}; TYPE_ORDER.forEach(function(k){ counts[k]=0; });
   allReports.forEach(function(r){ if(counts.hasOwnProperty(r.type)) counts[r.type]++; });
   if(!total){
     breakdown.appendChild(el('div',{class:'dash-empty'},[document.createTextNode('Aucun PV enregistré pour le moment.')]));
   } else {
-    var maxCount = Math.max(1, counts.PT, counts.MT, counts.VT);
-    ['PT','MT','VT'].forEach(function(key){
+    var maxCount = Math.max.apply(null, [1].concat(TYPE_ORDER.map(function(k){ return counts[k]; })));
+    TYPE_ORDER.forEach(function(key){
       var row = el('div',{class:'method-bar-row'});
       var top = el('div',{class:'method-bar-top'});
       top.appendChild(el('span',{},[document.createTextNode(METHODS[key].tabLabel)]));
@@ -2135,6 +2569,12 @@ async function enterApp(){
     maybeOfferLegacyMigration();
   }catch(err){
     if(!(err && err.authError)) console.error('reports load error', err);
+  }
+  try{
+    orgSettings = await apiGetSettings();
+    renderPreview();
+  }catch(err){
+    if(!(err && err.authError)) console.error('settings load error', err);
   }
 }
 async function doLogin(){
