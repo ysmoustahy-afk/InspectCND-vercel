@@ -1221,8 +1221,9 @@ function resultBadgeHTML(v){
 function renderPreview(){
   var c = state.common, t = state[currentType], m = METHODS[currentType];
   var docRef = c.h_docRef || m.defaultDocRef;
+  var docDate = c.h_docDate || m.defaultDocDate;
   var html = '';
-  html += '<div class="pv-topline"><span>'+(docRef?('Référence du document : '+esc(docRef)):'')+'</span><span>'+esc(todayFR())+'</span></div>';
+  html += '<div class="pv-topline"><span>'+(docRef?('Référence du document : '+esc(docRef)):'')+'</span><span>'+(docDate?esc(docDate):'')+'</span></div>';
   html += '<div class="pv-head">';
   html += '<div class="pv-numbox"><span class="lbl">N°</span><span class="val">'+val(c.h_numero)+'</span></div>';
   html += '<div class="pv-cmd"><span class="lbl">Commande / order N°</span><br><span class="val">'+val(c.h_commande)+'</span></div>';
